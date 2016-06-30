@@ -12,6 +12,23 @@ import java.util.Date;
  * @author fosa
  */
 public class Pessoa {
+
     String Nome;
     Date Nascimento;
+
+    public String getNome() {
+        return Nome;
+    }
+
+    public void setNome(String Nome) {
+        this.Nome = Nome;
+    }
+
+    public Date getNascimento() {
+        return Nascimento;
+    }
+
+    public void setNascimento(Date Nascimento) {
+        this.Nascimento = Nascimento;
+    }
 }

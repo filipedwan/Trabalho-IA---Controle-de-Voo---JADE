@@ -9,6 +9,20 @@ package caiaja.model;
  *
  * @author fosa
  */
-public class Controlador extends Pessoa{
-//    int 
+public class Controlador extends Pessoa {
+
+    Aeroporto Aeroporto;
+
+    public Controlador() {
+        super();
+    }
+
+    public Aeroporto getAeroporto() {
+        return Aeroporto;
+    }
+
+    public void setAeroporto(Aeroporto Aeroporto) {
+        this.Aeroporto = Aeroporto;
+    }
+
 }
