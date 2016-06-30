@@ -46,10 +46,10 @@ public class CAIAJa {
          */
         try {
             AgentController Controlador1 = ac.createNewAgent("Controlador1", "caiaja.agentes.ControladorAgent", new Object[0]);
-            AgentController Controlador2 = ac.createNewAgent("Controlador2", "caiaja.agentes.ControladorAgent", new Object[0]);
+//            AgentController Controlador2 = ac.createNewAgent("Controlador2", "caiaja.agentes.ControladorAgent", new Object[0]);
 
             Controlador1.start();
-            Controlador2.start();
+//            Controlador2.start();
 
             AgentController Estacao = ac.createNewAgent("Estacao", "caiaja.agentes.EstacaoMeteorologicaAgent", new Object[0]);
             Estacao.start();

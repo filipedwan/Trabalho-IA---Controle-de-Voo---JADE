@@ -15,7 +15,10 @@ import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
+import jade.lang.acl.ACLMessage;
+import jade.lang.acl.MessageTemplate;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -24,9 +27,12 @@ import java.util.ArrayList;
 public class ControladorAgent extends Agent {
 
     Controlador controlador;
+    List<AID> estacoesMeteorologicas;
 
     protected void setup() {
         Object[] args = getArguments();
+
+        estacoesMeteorologicas = new ArrayList<AID>();
 
         controlador = new Controlador();
         controlador.setNome("Fulano de Tal");
@@ -74,11 +80,25 @@ public class ControladorAgent extends Agent {
 
         @Override
         public void action() {
-//            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
+
+            for (AID estacao : estacoesMeteorologicas) {
+                System.out.println(getName() + ": Sai do meio que eu to passando " + estacao.getName());
+                cfp.addReceiver(estacao);
+            }
+
+            cfp.setConversationId("vo-passar");
+            cfp.setReplyWith("cfp" + System.currentTimeMillis());
+            cfp.setContent("Como está o tempo?");
+            myAgent.send(cfp);
+
         }
 
         @Override
         public boolean done() {
+            if (estacoesMeteorologicas.size() < 0) {
+                return true;
+            }
 //            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             return true;
         }
@@ -102,7 +122,7 @@ public class ControladorAgent extends Agent {
     /**
      * Tarefas Executadas por este Agente
      */
-    public static class ConsultarClima extends TickerBehaviour {
+    public class ConsultarClima extends TickerBehaviour {
 
         public ConsultarClima(Agent a, long period) {
             super(a, period);
@@ -117,22 +137,19 @@ public class ControladorAgent extends Agent {
             ServiceDescription sd = new ServiceDescription();
             sd.setType("EstacaoMeteorologica");
             template.addServices(sd);
+
+            estacoesMeteorologicas.clear();
             try {
                 DFAgentDescription[] result = DFService.search(myAgent, template);
-//                    System.out.println("Procurando outros veiculos:");
-//                    OutrosVeiculos = new AID[result.length];
-                ArrayList<AID> OutrosVeiculos = new ArrayList<AID>();
                 for (int i = 0; i < result.length; ++i) {
-//                    System.out.println("int i = " + i);
-//                    if (!result[i].getName().getName().equals(getName())) {
-//                        OutrosVeiculos.add(result[i].getName());
-//                        OutrosVeiculos[i] = result[i].getName();
-//                            System.out.println("Encontrado: " + result[i].getName());
-//                    }
+                    System.out.println("Estacao: " + result[i].getName());
+                    estacoesMeteorologicas.add(result[i].getName());
                 }
             } catch (FIPAException fe) {
                 fe.printStackTrace();
             }
+
+            myAgent.addBehaviour(new ConsultaClima());
         }
     }
 }
