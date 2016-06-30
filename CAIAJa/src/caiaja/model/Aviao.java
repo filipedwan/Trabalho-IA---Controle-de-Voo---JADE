@@ -11,4 +11,14 @@ package caiaja.model;
  */
 public class Aviao {
     
+    final int PROPULSAO_NENHUMA = 0;
+    final int PROPULSAO_PISTAO = 1;
+    final int PROPULSAO_JATO = 2;
+    final int PROPULSAO_TURBOHELICE = 3;
+    final int PROPULSAO_ELETRICO = 4;
+    
+    int pistaMinima;
+    String Prefixo;
+    int Propulsao; //Tipo de propulsao
+    int Motores; //Numero de motores da aeronave
 }

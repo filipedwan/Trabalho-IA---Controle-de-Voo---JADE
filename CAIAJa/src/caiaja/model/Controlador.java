@@ -9,6 +9,6 @@ package caiaja.model;
  *
  * @author fosa
  */
-public class Controlador {
-    
+public class Controlador extends Pessoa{
+//    int 
 }

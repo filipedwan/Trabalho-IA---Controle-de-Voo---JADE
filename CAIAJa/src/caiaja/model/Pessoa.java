@@ -11,9 +11,7 @@ import java.util.Date;
  *
  * @author fosa
  */
-public class Piloto extends Pessoa {
-
-    int horasDeVoo;
-    Date pilotoDesde;
-    
+public class Pessoa {
+    String Nome;
+    Date Nascimento;
 }

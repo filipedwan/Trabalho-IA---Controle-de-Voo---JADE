@@ -5,15 +5,10 @@
  */
 package caiaja.model;
 
-import java.util.Date;
-
 /**
  *
  * @author fosa
  */
-public class Piloto extends Pessoa {
-
-    int horasDeVoo;
-    Date pilotoDesde;
+public class Clima {
     
 }
