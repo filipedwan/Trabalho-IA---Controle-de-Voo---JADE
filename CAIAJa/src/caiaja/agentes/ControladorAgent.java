@@ -28,7 +28,8 @@ public class ControladorAgent extends Agent {
 
     Controlador controlador;
     List<AID> estacoesMeteorologicas;
-
+    Aeroporto aeroporto;
+    
     protected void setup() {
         Object[] args = getArguments();
 

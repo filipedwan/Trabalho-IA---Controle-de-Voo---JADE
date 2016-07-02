@@ -47,6 +47,5 @@ public class Aeroporto {
     public void setEstacaoMeteorologica(EstacaoMeteorologica estacaoMeteorologica) {
         this.estacaoMeteorologica = estacaoMeteorologica;
     }
-    
 
 }
