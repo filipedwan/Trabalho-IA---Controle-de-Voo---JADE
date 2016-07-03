@@ -9,20 +9,16 @@ package caiaja.model;
  *
  * @author fosa
  */
-public class Pista {
+public class Patio {
 
-    int tamanho;
+    int capacidade;
 
-    public Pista(int tamanho) {
-        this.tamanho = tamanho;
+    public int getCapacidade() {
+        return capacidade;
     }
 
-    public int getTamanho() {
-        return tamanho;
-    }
-
-    public void setTamanho(int tamanho) {
-        this.tamanho = tamanho;
+    public void setCapacidade(int capacidade) {
+        this.capacidade = capacidade;
     }
 
 }

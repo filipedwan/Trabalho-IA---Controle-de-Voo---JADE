@@ -5,6 +5,8 @@
  */
 package caiaja;
 
+import caiaja.model.Aeroporto;
+import caiaja.model.Pista;
 import jade.Boot;
 import static jade.Boot.DEFAULT_FILENAME;
 import jade.core.Profile;
@@ -41,15 +43,20 @@ public class CAIAJa {
             jade.core.Runtime.instance().createAgentContainer(p);
         }
 
+//        Aeroporto aero = new Aeroporto();
+//        aero.setNome("Atlas Brasil Catanhede");
+//        aero.setPrefixo("SBBV");
+//        aero.addPista(new Pista(2700));
         /**
          * Inicializando Agentes
          */
         try {
-            AgentController Controlador1 = ac.createNewAgent("Controlador1", "caiaja.agentes.ControladorAgent", new Object[0]);
-//            AgentController Controlador2 = ac.createNewAgent("Controlador2", "caiaja.agentes.ControladorAgent", new Object[0]);
 
+            AgentController Aeroporto = ac.createNewAgent("AeroportoSBBV", "caiaja.agentes.AeroportoAgent", new String[]{"", "SBBV", "Atlas Brasil Catanhede", "2700"});
+            Aeroporto.start();
+
+            AgentController Controlador1 = ac.createNewAgent("Controlador1", "caiaja.agentes.ControladorAgent", new String[]{"cmd Amiltom"});
             Controlador1.start();
-//            Controlador2.start();
 
             AgentController Estacao = ac.createNewAgent("Estacao", "caiaja.agentes.EstacaoMeteorologicaAgent", new Object[0]);
             Estacao.start();

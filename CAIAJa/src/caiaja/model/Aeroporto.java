@@ -5,6 +5,9 @@
  */
 package caiaja.model;
 
+import jade.util.leap.ArrayList;
+import java.util.List;
+
 /**
  *
  * @author fosa
@@ -13,8 +16,16 @@ public class Aeroporto {
 
     String Nome;
     String Prefixo;
-    Pista Pista;
+    List<Pista> Pistas;
+    List<Patio> Patio;
     EstacaoMeteorologica estacaoMeteorologica;
+    Controlador controlador;
+
+    public Aeroporto() {
+        setPistas(new java.util.ArrayList<>());
+        setControlador(null);
+        setEstacaoMeteorologica(null);
+    }
 
     public String getNome() {
         return Nome;
@@ -32,12 +43,12 @@ public class Aeroporto {
         this.Prefixo = Prefixo;
     }
 
-    public Pista getPista() {
-        return Pista;
+    public List<Pista> getPistas() {
+        return Pistas;
     }
 
-    public void setPista(Pista Pista) {
-        this.Pista = Pista;
+    public void setPistas(List<Pista> Pistas) {
+        this.Pistas = Pistas;
     }
 
     public EstacaoMeteorologica getEstacaoMeteorologica() {
@@ -46,6 +57,26 @@ public class Aeroporto {
 
     public void setEstacaoMeteorologica(EstacaoMeteorologica estacaoMeteorologica) {
         this.estacaoMeteorologica = estacaoMeteorologica;
+    }
+
+    public List<Patio> getPatio() {
+        return Patio;
+    }
+
+    public void setPatio(List<Patio> Patio) {
+        this.Patio = Patio;
+    }
+
+    public void addPista(Pista Pista) {
+        this.Pistas.add(Pista);
+    }
+
+    public Controlador getControlador() {
+        return controlador;
+    }
+
+    public void setControlador(Controlador controlador) {
+        this.controlador = controlador;
     }
 
 }
