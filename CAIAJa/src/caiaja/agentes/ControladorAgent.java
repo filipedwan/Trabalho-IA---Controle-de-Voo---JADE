@@ -184,11 +184,6 @@ public class ControladorAgent extends Agent {
                                 aeroporto = reply.getSender();
                                 System.out.println(getName() + ": Controlando " + Escolhido.getName());
                                 
-//                                (AeroportoAgentaeroporto.setName("To nem ai, Hackeado por kkkxx");
-//                            } catch (UnreadableException ex) {
-//                                Logger.getLogger(ControladorAgent.class.getName()).log(Level.SEVERE, null, ex);
-//                                System.out.println(getName() + ": Erro aou controalr" + Escolhido.getName());
-//                            }
                         } else {
                             System.out.println(getName() + ": não pode controlar " + Escolhido.getName() + " já conseguiu outro controlador");
                         }
