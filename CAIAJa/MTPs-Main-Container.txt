@@ -1,1 +1,1 @@
-http://172.22.13.133:7778/acc
+http://dcc-69147.paricarana.ufrr.br:7778/acc

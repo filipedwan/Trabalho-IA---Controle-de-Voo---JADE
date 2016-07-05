@@ -86,7 +86,6 @@ public class ControladorAgent extends Agent {
                 template.addServices(sd);
 
                 List<AID> aerosportos = new ArrayList<AID>();
-//            estacoesMeteorologicas.clear();
                 try {
                     DFAgentDescription[] result = DFService.search(myAgent, template);
                     for (int i = 0; i < result.length; ++i) {
@@ -222,11 +221,6 @@ public class ControladorAgent extends Agent {
         @Override
         public void action() {
             ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
-
-//            for (AID estacao : estacoesMeteorologicas) {
-//                System.out.println(getName() + ": Sai do meio que eu to passando " + estacao.getName());
-//                cfp.addReceiver(estacao);
-//            }
             cfp.setConversationId("vo-passar");
             cfp.setReplyWith("cfp" + System.currentTimeMillis());
             cfp.setContent("Como está o tempo?");
