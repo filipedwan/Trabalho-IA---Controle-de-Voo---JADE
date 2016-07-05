@@ -6,13 +6,14 @@
 package caiaja.model;
 
 import jade.util.leap.ArrayList;
+import java.io.Serializable;
 import java.util.List;
 
 /**
  *
  * @author fosa
  */
-public class Aeroporto {
+public class Aeroporto implements Serializable {
 
     String Nome;
     String Prefixo;
@@ -22,9 +23,9 @@ public class Aeroporto {
     Controlador controlador;
 
     public Aeroporto() {
-        setPistas(new java.util.ArrayList<>());
-        setControlador(null);
-        setEstacaoMeteorologica(null);
+        Pistas = new java.util.ArrayList<>();
+        controlador = null;
+        estacaoMeteorologica = null;
     }
 
     public String getNome() {

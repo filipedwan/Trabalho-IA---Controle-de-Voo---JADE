@@ -5,11 +5,13 @@
  */
 package caiaja.model;
 
+import java.io.Serializable;
+
 /**
  *
  * @author fosa
  */
-public class Pista {
+public class Pista implements Serializable {
 
     int tamanho;
 

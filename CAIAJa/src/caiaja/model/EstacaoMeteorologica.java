@@ -5,10 +5,12 @@
  */
 package caiaja.model;
 
+import java.io.Serializable;
+
 /**
  *
  * @author fosa
  */
-public class EstacaoMeteorologica {
+public class EstacaoMeteorologica implements Serializable{
     
 }

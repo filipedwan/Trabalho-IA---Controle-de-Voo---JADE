@@ -5,13 +5,14 @@
  */
 package caiaja.model;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
  *
  * @author fosa
  */
-public class Pessoa {
+public class Pessoa implements Serializable{
 
     String Nome;
     Date Nascimento;

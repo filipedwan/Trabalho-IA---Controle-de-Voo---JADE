@@ -6,15 +6,21 @@
 package caiaja.agentes;
 
 import caiaja.model.Aeroporto;
+import caiaja.model.Controlador;
 import caiaja.model.Pista;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
+import jade.core.behaviours.TickerBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
+import jade.lang.acl.UnreadableException;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -84,6 +90,7 @@ public class AeroportoAgent extends Agent {
 
             addBehaviour(new RequisicoesDePropostas());
             addBehaviour(new PropostaControlar());
+            addBehaviour(new ImprimeNome(this, 2000));
         }
 
     }
@@ -132,10 +139,23 @@ public class AeroportoAgent extends Agent {
                 ACLMessage reply = msg.createReply();
 
                 if (aeroporto.getControlador() == null) {
-                    reply.setPerformative(ACLMessage.INFORM);
-                    System.out.println(getName() + ": controlado por " + msg.getSender().getName());
+                    try {
+                        System.out.println("Class: " + msg.getContentObject().getClass());
+//                        System.out.println((((Controlador) msg.getContentObject()).getNome()));
+                        aeroporto.setControlador((Controlador) msg.getContentObject());
+
+                        reply.setPerformative(ACLMessage.INFORM);
+                        reply.setContentObject(aeroporto);
+                        System.out.println(getName() + ": controlado por " + msg.getSender().getName());
+                    } catch (UnreadableException ex) {
+                        System.out.println(getName() + ": erro na msg");
+                        reply.setPerformative(ACLMessage.FAILURE);
+                        reply.setContent("error-msg");
+                    } catch (IOException ex) {
+                        Logger.getLogger(AeroportoAgent.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 } else {
-                    System.out.println(getName()+": arrumou um controlador neste tempo");
+                    System.out.println(getName() + ": arrumou um controlador neste tempo");
                     reply.setPerformative(ACLMessage.FAILURE);
                     reply.setContent("not-available");
                 }
@@ -144,6 +164,22 @@ public class AeroportoAgent extends Agent {
                 block();
             }
         }
+    }
+
+    private class ImprimeNome extends TickerBehaviour {
+
+        public ImprimeNome(Agent a, long period) {
+            super(a, period);
+        }
+
+        @Override
+        protected void onTick() {
+            System.out.println("Aeroporto: " + aeroporto.getNome());
+            if (aeroporto.getControlador() != null) {
+                System.out.println("Controlador: " + aeroporto.getControlador().getNome());
+            }
+        }
+
     }
 
 }

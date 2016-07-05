@@ -5,11 +5,13 @@
  */
 package caiaja.model;
 
+import java.io.Serializable;
+
 /**
  *
  * @author fosa
  */
-public class Controlador extends Pessoa {
+public class Controlador extends Pessoa implements Serializable{
 
     Aeroporto Aeroporto;
 

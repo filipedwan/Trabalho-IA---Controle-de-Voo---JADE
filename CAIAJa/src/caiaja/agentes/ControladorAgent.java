@@ -18,8 +18,12 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
+import jade.lang.acl.UnreadableException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -28,13 +32,13 @@ import java.util.List;
 public class ControladorAgent extends Agent {
 
     Controlador controlador;
-    Aeroporto aeroporto;
+    AID aeroporto;
 
     protected void setup() {
         Object[] args = getArguments();
 
         controlador = new Controlador();
-        Aeroporto aero = null;
+        aeroporto = null;
         if (args != null) {
             if (args.length > 0) {
                 controlador.setNome((String) args[0]);
@@ -54,7 +58,7 @@ public class ControladorAgent extends Agent {
                     fe.printStackTrace();
                 }
 
-                addBehaviour(new BuscarEmprego(this, 5000));
+                addBehaviour(new BuscarEmprego(this, 2000));
 
                 addBehaviour(new RequisicoesDePropostas());
             }
@@ -139,7 +143,6 @@ public class ControladorAgent extends Agent {
                         // Reply received
                         if (reply.getPerformative() == ACLMessage.PROPOSE) {
                             Escolhido = reply.getSender();
-                            estado = 2;
                         }
 
                         repliesCnt++;
@@ -156,7 +159,12 @@ public class ControladorAgent extends Agent {
 
                     ACLMessage controlar = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
                     controlar.addReceiver(Escolhido);
-                    controlar.setContent("Aceito controlar");
+//                    controlar.setContent("Aceito controlar");
+                    try {
+                        controlar.setContentObject(controlador);
+                    } catch (IOException ex) {
+                        Logger.getLogger(ControladorAgent.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                     controlar.setConversationId("proposta-controlador");
                     controlar.setReplyWith("controlar" + System.currentTimeMillis());
                     myAgent.send(controlar);
@@ -173,7 +181,15 @@ public class ControladorAgent extends Agent {
                     ACLMessage reply = myAgent.receive(mt);
                     if (reply != null) {
                         if (reply.getPerformative() == ACLMessage.INFORM) {
-                            System.out.println(getName() + ": Controlando " + Escolhido.getName());
+//                            try {
+                                aeroporto = reply.getSender();
+                                System.out.println(getName() + ": Controlando " + Escolhido.getName());
+                                
+//                                (AeroportoAgentaeroporto.setName("To nem ai, Hackeado por kkkxx");
+//                            } catch (UnreadableException ex) {
+//                                Logger.getLogger(ControladorAgent.class.getName()).log(Level.SEVERE, null, ex);
+//                                System.out.println(getName() + ": Erro aou controalr" + Escolhido.getName());
+//                            }
                         } else {
                             System.out.println(getName() + ": não pode controlar " + Escolhido.getName() + " já conseguiu outro controlador");
                         }
