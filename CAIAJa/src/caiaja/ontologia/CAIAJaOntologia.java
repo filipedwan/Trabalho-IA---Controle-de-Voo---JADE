@@ -11,7 +11,7 @@ import caiaja.model.Controlador;
 import caiaja.model.Piloto;
 import caiaja.ontologia.acoes.Decolar;
 import caiaja.ontologia.acoes.Pousar;
-import caiaja.ontologia.predicados.Pilotar;
+import caiaja.ontologia.predicados.Pilota;
 import jade.content.onto.BasicOntology;
 import jade.content.onto.BeanOntology;
 import jade.content.onto.Ontology;
@@ -93,9 +93,9 @@ public class CAIAJaOntologia extends BeanOntology {
             add(new AgentActionSchema(POUSAR), Pousar.class);
 
             //Predicados
-            add(new PredicateSchema(PILOTA), Pilotar.class);
-            add(new PredicateSchema(CONTROLA), Pilotar.class);
-            add(new PredicateSchema(CONTROLADOR_E), Pilotar.class);
+            add(new PredicateSchema(PILOTA), Pilota.class);
+            add(new PredicateSchema(CONTROLA), Pilota.class);
+            add(new PredicateSchema(CONTROLADOR_E), Pilota.class);
 
             //Conceitos
             ConceptSchema cs = (ConceptSchema) getSchema(PESSOA);
