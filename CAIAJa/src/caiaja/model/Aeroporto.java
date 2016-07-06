@@ -47,6 +47,15 @@ public class Aeroporto implements Serializable, Concept {
         return null;
     }
 
+    public Aviao retiraAviao(int i) {
+        if (i <= avioes.size()) {            
+            Aviao av = avioes.get(i);
+            avioes.remove(av);
+            return av;
+        }
+        return null;
+    }
+
     public String getNome() {
         return Nome;
     }

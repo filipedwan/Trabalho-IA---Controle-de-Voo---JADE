@@ -82,10 +82,13 @@ public class AeroportoAgent extends Agent {
 
             try {
                 int naeronaves = Integer.parseInt(numero);
-                for (int i = 0; i < args.length; i++) {
-                    Aviao av = new Aviao("PT-" + ((int) (Math.random() * 3));
+                for (int i = 0; i < naeronaves; i++) {
+                    Aviao av = new Aviao("PT-" + ((int) (Math.random() * 100)));
                     aeroporto.addAviao(av);
                 }
+            } catch (Exception e) {
+                Aviao av = new Aviao("PT-" + ((int) (Math.random() * 100)));
+                aeroporto.addAviao(av);
             }
 
             DFAgentDescription dfd = new DFAgentDescription();
@@ -268,11 +271,10 @@ public class AeroportoAgent extends Agent {
                 String title = msg.getContent();
                 ACLMessage reply = msg.createReply();
 
-                if (aeroporto.getQuantidadeAvioes() > 0) {
+                Aviao av = aeroporto.retiraAviao(0);
+                if (av != null) {
                     try {
                         Piloto pil = (Piloto) msg.getContentObject();
-
-                        Aviao av = aeroporto.getAviao(0);
 
                         reply.setPerformative(ACLMessage.INFORM);
                         reply.setContentObject(av);
