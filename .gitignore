@@ -1,4 +1,5 @@
 /CAIAJa/nbproject/private/
 /CAIAJa/build/
-CAIAJa/MTPs-Main-Container.txt
-CAIAJa/APDescription.txt
+CAIAJa/dist/CAIAJa.jar
+CAIAJa/dist/lib/jade.jar
+CAIAJa/dist/README.TXT
