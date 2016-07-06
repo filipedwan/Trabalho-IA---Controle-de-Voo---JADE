@@ -36,7 +36,11 @@ public class Aeroporto implements Serializable, Concept {
         avioes.add(aviao);
     }
 
-    public Aviao pegaAviao(int i) {
+    public int getQuantidadeAvioes() {
+        return avioes.size();
+    }
+
+    public Aviao getAviao(int i) {
         if (i <= avioes.size()) {
             return avioes.get(i);
         }
