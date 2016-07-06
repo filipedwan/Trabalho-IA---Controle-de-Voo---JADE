@@ -5,6 +5,7 @@
  */
 package caiaja.model;
 
+import jade.content.Concept;
 import jade.util.leap.ArrayList;
 import java.io.Serializable;
 import java.util.List;
@@ -13,7 +14,7 @@ import java.util.List;
  *
  * @author fosa
  */
-public class Aeroporto implements Serializable {
+public class Aeroporto implements Serializable, Concept {
 
     String Nome;
     String Prefixo;

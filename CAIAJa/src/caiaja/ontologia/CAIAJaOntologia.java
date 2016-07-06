@@ -7,27 +7,18 @@ package caiaja.ontologia;
 
 import caiaja.model.Aeroporto;
 import caiaja.model.Aviao;
-import caiaja.model.Carro;
-import caiaja.model.CarroDeBombeiro;
-import caiaja.model.Clima;
 import caiaja.model.Controlador;
-import caiaja.model.EstacaoMeteorologica;
-import caiaja.model.Patio;
-import caiaja.model.Pessoa;
 import caiaja.model.Piloto;
-import caiaja.model.Pista;
-import caiaja.model.Torre;
 import caiaja.ontologia.acoes.Decolar;
 import caiaja.ontologia.acoes.Pousar;
-import caiaja.ontologia.predicados.pilota;
+import caiaja.ontologia.predicados.Pilota;
 import jade.content.onto.BasicOntology;
 import jade.content.onto.BeanOntology;
+import jade.content.onto.Ontology;
 import jade.content.schema.AgentActionSchema;
 import jade.content.schema.ConceptSchema;
-import jade.content.schema.ObjectSchema;
 import jade.content.schema.PredicateSchema;
 import jade.content.schema.PrimitiveSchema;
-import jade.domain.FIPANames.Ontology;
 
 /**
  *
@@ -70,18 +61,26 @@ public class CAIAJaOntologia extends BeanOntology {
     public static final String PILOTA_PILOTO = "piloto";
     public static final String PILOTA_AVIAO = "aviao";
 
+    public static final String CONTROLA = "CONTROLA";
+    public static final String CONTROLA_CONTROLADOR = "controlador";
+    public static final String CONTROLA_AEROPORTO = "aeroporto";
+
     public static final String CONTROLADO_POR = "CONTROLADOR-POR";
+    public static final String CONTROLADO_POR_AEROPORTO = "aeroporto";
     public static final String CONTROLADO_POR_CONTROLADOR = "controlador";
+
+    public static final String CONTROLADOR_E = "CONTROLADOR_E";
+    public static final String CONTROLADOR_E_PESSOA = "pessoa";
+    public static final String CONTROLADOR_E_CONTROLADOR = "controlador";
 
     public static Ontology getInstance() {
         return theInstance;
     }
 
     public CAIAJaOntologia() {
-        super(NAME);
+        super(NAME, BasicOntology.getInstance());
 
         try {
-
             //Conceitos
             add(new ConceptSchema(PESSOA), Piloto.class);
             add(new ConceptSchema(PILOTO), Piloto.class);
@@ -94,7 +93,9 @@ public class CAIAJaOntologia extends BeanOntology {
             add(new AgentActionSchema(POUSAR), Pousar.class);
 
             //Predicados
-            add(new PredicateSchema(PILOTA), pilota.class);
+            add(new PredicateSchema(PILOTA), Pilota.class);
+            add(new PredicateSchema(CONTROLA), Pilota.class);
+            add(new PredicateSchema(CONTROLADOR_E), Pilota.class);
 
             //Conceitos
             ConceptSchema cs = (ConceptSchema) getSchema(PESSOA);
@@ -116,6 +117,14 @@ public class CAIAJaOntologia extends BeanOntology {
             PredicateSchema ps = (PredicateSchema) getSchema(PILOTA);
             ps.add(PILOTA_PILOTO, (ConceptSchema) getSchema(PILOTO));
             ps.add(PILOTA_AVIAO, (ConceptSchema) getSchema(AVIAO));
+
+            ps = (PredicateSchema) getSchema(CONTROLA);
+            ps.add(CONTROLA_AEROPORTO, (ConceptSchema) getSchema(AEROPORTO));
+            ps.add(CONTROLA_CONTROLADOR, (ConceptSchema) getSchema(CONTROLADOR));
+
+            ps = (PredicateSchema) getSchema(CONTROLADOR_E);
+            ps.add(CONTROLADOR_E_CONTROLADOR, (ConceptSchema) getSchema(CONTROLADOR));
+            ps.add(CONTROLADOR_E_PESSOA, (ConceptSchema) getSchema(PESSOA));
 
         } catch (Exception e) {
             e.printStackTrace();
