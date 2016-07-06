@@ -19,6 +19,7 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
+import jade.lang.acl.UnreadableException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,11 +38,11 @@ public class PilotoAgente extends Agent {
 
     protected void setup() {
         Object[] args = getArguments();
-        
+
         piloto = new Piloto();
         aviao = null;
         aeroporto = null;
-        
+
         if (args != null) {
             if (args.length > 0) {
                 piloto.setNome((String) args[0]);
@@ -67,42 +68,41 @@ public class PilotoAgente extends Agent {
             }
         }
     }
-    
-    
-   private class BuscarEmprego extends TickerBehaviour {
+
+    private class BuscarEmprego extends TickerBehaviour {
 
         public BuscarEmprego(Agent a, long period) {
             super(a, period);
         }
 
-       @Override
-       protected void onTick() {
+        @Override
+        protected void onTick() {
 
-           if (aeroporto == null) {
-               DFAgentDescription template = new DFAgentDescription();
-               ServiceDescription sd = new ServiceDescription();
-               sd.setType("Aeroporto");
-               template.addServices(sd);
+            if (aviao == null) {
+                DFAgentDescription template = new DFAgentDescription();
+                ServiceDescription sd = new ServiceDescription();
+                sd.setType("Aeroporto");
+                template.addServices(sd);
 
-               List<AID> aerosportos = new ArrayList<AID>();
-               try {
-                   DFAgentDescription[] result = DFService.search(myAgent, template);
-                   for (int i = 0; i < result.length; ++i) {
-                       aerosportos.add(result[i].getName());
-                   }
-               } catch (FIPAException fe) {
-                   fe.printStackTrace();
-               }
+                List<AID> aerosportos = new ArrayList<AID>();
+                try {
+                    DFAgentDescription[] result = DFService.search(myAgent, template);
+                    for (int i = 0; i < result.length; ++i) {
+                        aerosportos.add(result[i].getName());
+                    }
+                } catch (FIPAException fe) {
+                    fe.printStackTrace();
+                }
 
-               myAgent.addBehaviour(new PilotoAgente.PropoePilotar(aerosportos));
-           } else {
-               block();
-           }
+                myAgent.addBehaviour(new PilotoAgente.PropoePilotar(aerosportos));
+            } else {
+                block();
+            }
+
+        }
 
     }
-   
-   }
-   
+
     private class PropoePilotar extends Behaviour {
 
         List<AID> aerosportos;
@@ -119,7 +119,7 @@ public class PilotoAgente extends Agent {
         public void action() {
             switch (estado) {
                 case 0: {
-                    System.out.println(getName() + ": Estado 0");
+                    System.out.println(piloto.getNome() + ": Estado 0");
                     ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
 
                     for (AID aerosporto : aerosportos) {
@@ -137,7 +137,7 @@ public class PilotoAgente extends Agent {
                     break;
                 }
                 case 1: {
-                    System.out.println(getName() + ": Estado 1");
+                    System.out.println(piloto.getNome() + ": Estado 1");
                     ACLMessage reply = myAgent.receive(mt);
 
                     if (reply != null) {
@@ -156,7 +156,7 @@ public class PilotoAgente extends Agent {
                     break;
                 }
                 case 2: {
-                    System.out.println(getName() + ": Estado 2");
+                    System.out.println(piloto.getNome() + ": Estado 2");
 
                     ACLMessage msg = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
                     msg.addReceiver(Escolhido);
@@ -169,7 +169,7 @@ public class PilotoAgente extends Agent {
                     msg.setConversationId("proposta-piloto");
                     msg.setReplyWith("pilotar" + System.currentTimeMillis());
                     myAgent.send(msg);
-                    System.out.println(getName() + " --> " + Escolhido.getName() + ": Aceito Pilotar");
+                    System.out.println(piloto.getNome() + " --> " + Escolhido.getName() + ": Aceito Pilotar");
 
                     mt = MessageTemplate.and(MessageTemplate.MatchConversationId("proposta-piloto"),
                             MessageTemplate.MatchInReplyTo(msg.getReplyWith()));
@@ -177,16 +177,21 @@ public class PilotoAgente extends Agent {
                     break;
                 }
                 case 3: {
-                    System.out.println(getName() + ": Estado 3");
+                    System.out.println(piloto.getNome() + ": Estado 3");
 
                     ACLMessage reply = myAgent.receive(mt);
                     if (reply != null) {
                         if (reply.getPerformative() == ACLMessage.INFORM) {
-                                aeroporto = reply.getSender();
-                                System.out.println(getName() + ": Pilotando " + Escolhido.getName());
-                                
+                            aeroporto = reply.getSender();
+                            try {
+                                aviao = ((Aviao) reply.getContentObject());
+                                System.out.println(piloto.getNome() + ": Pilotando " + aviao.getPrefixo());
+                            } catch (UnreadableException ex) {
+                                Logger.getLogger(PilotoAgente.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+
                         } else {
-                            System.out.println(getName() + ": não pode pilotar " + Escolhido.getName() + " já conseguiu outro piloto");
+                            System.out.println(piloto.getNome() + ": não pode pilotar " + Escolhido.getName() + " já conseguiu outro piloto");
                         }
 
                         estado = 4;
@@ -196,7 +201,7 @@ public class PilotoAgente extends Agent {
                     break;
                 }
                 case 4: {
-                    System.out.println(getName() + ": Estado 4");
+                    System.out.println(piloto.getNome() + ": Estado 4");
                     break;
                 }
             }
@@ -207,11 +212,14 @@ public class PilotoAgente extends Agent {
             if (estado == 4) {
                 return true;
             }
+            if (estado > 1 && Escolhido == null) {
+                return true;
+            }
             return false;
         }
 
     }
-    
+
     /**
      * Classe para responder aos requerimentos de controladores que precisem de
      * um aeroporto pra controlar, retonar sim ou não para a requisição
@@ -232,8 +240,6 @@ public class PilotoAgente extends Agent {
                 block();
             }
         }
-    }    
+    }
 
 }
-
-
