@@ -8,6 +8,7 @@ package caiaja.agentes;
 import caiaja.model.Aeroporto;
 import caiaja.model.Aviao;
 import caiaja.model.Controlador;
+import caiaja.model.Piloto;
 import caiaja.ontologia.CAIAJaOntologia;
 import caiaja.ontologia.predicados.ControladoPor;
 import jade.content.lang.sl.SLCodec;
@@ -79,8 +80,8 @@ public class ControladorAgent extends Agent {
 
                 addBehaviour(new BuscarEmprego(this, 2000));
 
-                addBehaviour(new RequisicoesDePropostas());
-                addBehaviour(new VerificaOntologia(this, 2000));
+//                addBehaviour(new RequisicoesDePropostas());
+//                addBehaviour(new VerificaOntologia(this, 2000));
                 addBehaviour(new Contato());
             }
         }
@@ -118,7 +119,7 @@ public class ControladorAgent extends Agent {
                 try {
                     myAgent.getContentManager().fillContent(queryMsg, ctrl);
                 } catch (Exception e) {
-                    e.printStackTrace();
+//                    e.printStackTrace();
                 }
             }
         }
@@ -170,9 +171,9 @@ public class ControladorAgent extends Agent {
 
         @Override
         public void action() {
+            System.out.println(controlador.getNome() + ": PropoeControlar " + estado);
             switch (estado) {
                 case 0: {
-                    System.out.println(controlador.getNome() + ": Estado 0");
                     ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
 
                     for (AID aerosporto : aerosportos) {
@@ -190,7 +191,6 @@ public class ControladorAgent extends Agent {
                     break;
                 }
                 case 1: {
-                    System.out.println(controlador.getNome() + ": Estado 1");
                     ACLMessage reply = myAgent.receive(mt);
 
                     if (reply != null) {
@@ -209,8 +209,6 @@ public class ControladorAgent extends Agent {
                     break;
                 }
                 case 2: {
-                    System.out.println(controlador.getNome() + ": Estado 2");
-
                     ACLMessage controlar = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
                     controlar.addReceiver(Escolhido);
 //                    controlar.setContent("Aceito controlar");
@@ -230,8 +228,6 @@ public class ControladorAgent extends Agent {
                     break;
                 }
                 case 3: {
-                    System.out.println(controlador.getNome() + ": Estado 3");
-
                     ACLMessage reply = myAgent.receive(mt);
                     if (reply != null) {
                         if (reply.getPerformative() == ACLMessage.INFORM) {
@@ -255,7 +251,6 @@ public class ControladorAgent extends Agent {
                     break;
                 }
                 case 4: {
-                    System.out.println(controlador.getNome() + ": Estado 4");
                     break;
                 }
             }
@@ -342,26 +337,21 @@ public class ControladorAgent extends Agent {
         public void action() {
             if (aeroporto_m != null) {
                 MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.CFP), MessageTemplate.MatchContent(aeroporto_m.getPrefixo()));
-//                MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.CFP);
+
                 ACLMessage msg = myAgent.receive(mt);
                 if (msg != null) {
                     String title = msg.getContent();
                     ACLMessage reply = msg.createReply();
 
-                    if (aeroporto_m.getPrefixo() == msg.getContent()) {
-                        System.out.println(controlador.getNome() + ": Sou seu controlador");
-                        reply.setPerformative(ACLMessage.PROPOSE);
-                        reply.setContent("Serei seu Controlador");
-                        try {
-                            reply.setContentObject(controlador);
-                        } catch (IOException ex) {
-                            Logger.getLogger(ControladorAgent.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-                    } else {
-                        System.out.println(controlador.getNome() + ": Não sou eu quem você está procurando");
-                        reply.setPerformative(ACLMessage.REFUSE);
-                        reply.setContent("Não sou eu");
+                    System.out.println(controlador.getNome() + ": Sou seu controlador!");
+                    reply.setPerformative(ACLMessage.PROPOSE);
+                    reply.setContent("Serei seu Controlador");
+                    try {
+                        reply.setContentObject(controlador);
+                    } catch (IOException ex) {
+                        Logger.getLogger(ControladorAgent.class.getName()).log(Level.SEVERE, null, ex);
                     }
+
                     myAgent.send(reply);
                 }
             } else {
