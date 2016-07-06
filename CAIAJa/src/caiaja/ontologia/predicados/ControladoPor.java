@@ -1,9 +1,7 @@
 package caiaja.ontologia.predicados;
 
 import caiaja.model.Aeroporto;
-import caiaja.model.Aviao;
 import caiaja.model.Controlador;
-import caiaja.model.Piloto;
 import jade.content.Predicate;
 
 /**
