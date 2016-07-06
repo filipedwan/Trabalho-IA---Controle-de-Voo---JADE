@@ -28,4 +28,26 @@ public class Pista implements Serializable, Concept {
         this.tamanho = tamanho;
     }
 
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 73 * hash + this.tamanho;
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Pista other = (Pista) obj;
+        if (this.tamanho != other.tamanho) {
+            return false;
+        }
+        return true;
+    }
+
 }

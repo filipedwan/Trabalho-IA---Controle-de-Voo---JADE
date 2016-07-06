@@ -9,6 +9,7 @@ import jade.content.Concept;
 import jade.util.leap.ArrayList;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 
 /**
  *
@@ -30,11 +31,11 @@ public class Aeroporto implements Serializable, Concept {
         estacaoMeteorologica = null;
         avioes = new java.util.ArrayList<>();
     }
-    
+
     void addAviao(Aviao aviao) {
         avioes.add(aviao);
     }
-    
+
     Aviao pegaAviao(int i) {
         if (i <= avioes.size()) {
             return avioes.get(i);
@@ -92,6 +93,32 @@ public class Aeroporto implements Serializable, Concept {
 
     public void setControlador(Controlador controlador) {
         this.controlador = controlador;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 67 * hash + Objects.hashCode(this.Nome);
+        hash = 67 * hash + Objects.hashCode(this.Prefixo);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Aeroporto other = (Aeroporto) obj;
+        if (!Objects.equals(this.Nome, other.Nome)) {
+            return false;
+        }
+        if (!Objects.equals(this.Prefixo, other.Prefixo)) {
+            return false;
+        }
+        return true;
     }
 
 }

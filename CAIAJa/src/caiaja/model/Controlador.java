@@ -7,6 +7,7 @@ package caiaja.model;
 
 import jade.content.Concept;
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  *
@@ -26,6 +27,34 @@ public class Controlador extends Pessoa implements Serializable, Concept {
 
     public void setAeroporto(Aeroporto Aeroporto) {
         this.Aeroporto = Aeroporto;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 17 * hash + Objects.hashCode(this.Aeroporto);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Controlador other = (Controlador) obj;
+        if (!Objects.equals(this.Aeroporto, other.Aeroporto)) {
+            return false;
+        }
+        if (!Objects.equals(this.Nome, other.Nome)) {
+            return false;
+        }
+        if (!Objects.equals(this.Nascimento, other.Nascimento)) {
+            return false;
+        }
+        return true;
     }
 
 }

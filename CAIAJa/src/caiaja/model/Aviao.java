@@ -7,6 +7,7 @@ package caiaja.model;
 
 import jade.content.Concept;
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  *
@@ -62,6 +63,28 @@ public class Aviao implements Serializable, Concept {
 
     public void setMotores(int Motores) {
         this.Motores = Motores;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 83 * hash + Objects.hashCode(this.Prefixo);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Aviao other = (Aviao) obj;
+        if (!Objects.equals(this.Prefixo, other.Prefixo)) {
+            return false;
+        }
+        return true;
     }
 
 }
