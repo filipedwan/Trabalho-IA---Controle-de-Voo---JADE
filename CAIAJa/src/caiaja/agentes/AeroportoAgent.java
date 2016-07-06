@@ -205,9 +205,9 @@ public class AeroportoAgent extends Agent {
                     reply.setPerformative(ACLMessage.PROPOSE);
                     reply.setContent("Tenho aeronaves");
                     try {
-                        reply.setContentObject(new Aviao("pt-alf"));
-                    } catch (Exception e) {
-
+                        reply.setContentObject(aeroporto);
+                    } catch (IOException ex) {
+                        Logger.getLogger(AeroportoAgent.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 } else {
                     System.out.println(aeroporto.getNome() + ": não tenho aeronaves disponíveis");

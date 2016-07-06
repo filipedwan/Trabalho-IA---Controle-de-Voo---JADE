@@ -68,6 +68,7 @@ public class ControladorAgent extends Agent {
                 ServiceDescription sd = new ServiceDescription();
                 sd.setType("Controlador");
                 sd.setName(controlador.getNome());
+
                 dfd.addServices(sd);
 
                 try {
@@ -80,6 +81,7 @@ public class ControladorAgent extends Agent {
 
                 addBehaviour(new RequisicoesDePropostas());
                 addBehaviour(new VerificaOntologia(this, 2000));
+                addBehaviour(new Contato());
             }
         }
     }
@@ -100,7 +102,7 @@ public class ControladorAgent extends Agent {
         protected void onTick() {
 
             if (aeroporto_m != null) {
-                System.out.println(controlador.getNome()+": Verificando Ontologia ");
+                System.out.println(controlador.getNome() + ": Verificando Ontologia ");
                 ControladoPor ctrl = new ControladoPor();
                 ctrl.setAeroporto(aeroporto_m);
                 ctrl.setControlador(controlador);
@@ -235,6 +237,11 @@ public class ControladorAgent extends Agent {
                         if (reply.getPerformative() == ACLMessage.INFORM) {
 //                            try {
                             aeroporto = reply.getSender();
+                            try {
+                                aeroporto_m = (Aeroporto) reply.getContentObject();
+                            } catch (UnreadableException ex) {
+                                Logger.getLogger(ControladorAgent.class.getName()).log(Level.SEVERE, null, ex);
+                            }
                             System.out.println(controlador.getNome() + ": Controlando " + Escolhido.getName());
 
                         } else {
@@ -329,16 +336,38 @@ public class ControladorAgent extends Agent {
 
     }
 
-    private class Contato extends Behaviour {
+    private class Contato extends CyclicBehaviour {
 
         @Override
         public void action() {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        }
+            if (aeroporto_m != null) {
+                MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.CFP), MessageTemplate.MatchContent(aeroporto_m.getPrefixo()));
+//                MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.CFP);
+                ACLMessage msg = myAgent.receive(mt);
+                if (msg != null) {
+                    String title = msg.getContent();
+                    ACLMessage reply = msg.createReply();
 
-        @Override
-        public boolean done() {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                    if (aeroporto_m.getPrefixo() == msg.getContent()) {
+                        System.out.println(controlador.getNome() + ": Sou seu controlador");
+                        reply.setPerformative(ACLMessage.PROPOSE);
+                        reply.setContent("Serei seu Controlador");
+                        try {
+                            reply.setContentObject(controlador);
+                        } catch (IOException ex) {
+                            Logger.getLogger(ControladorAgent.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    } else {
+                        System.out.println(controlador.getNome() + ": Não sou eu quem você está procurando");
+                        reply.setPerformative(ACLMessage.REFUSE);
+                        reply.setContent("Não sou eu");
+                    }
+                    myAgent.send(reply);
+                }
+            } else {
+                block();
+            }
+
         }
 
     }
