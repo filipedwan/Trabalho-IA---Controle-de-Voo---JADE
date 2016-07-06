@@ -54,7 +54,7 @@ public class PilotoAgente extends Agent {
             if (args.length > 0) {
                 piloto.setNome((String) args[0]);
 
-                System.out.println("Controlador " + piloto.getNome() + " procurando avião");
+                System.out.println("Piloto " + piloto.getNome() + " procurando avião");
 
                 DFAgentDescription dfd = new DFAgentDescription();
                 dfd.setName(getAID());
