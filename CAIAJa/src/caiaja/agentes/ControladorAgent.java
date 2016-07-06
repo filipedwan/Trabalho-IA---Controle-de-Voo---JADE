@@ -6,7 +6,12 @@
 package caiaja.agentes;
 
 import caiaja.model.Aeroporto;
+import caiaja.model.Aviao;
 import caiaja.model.Controlador;
+import caiaja.ontologia.CAIAJaOntologia;
+import caiaja.ontologia.predicados.ControladoPor;
+import jade.content.lang.sl.SLCodec;
+import jade.content.onto.Ontology;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
@@ -16,6 +21,7 @@ import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
+import jade.domain.FIPANames;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.lang.acl.UnreadableException;
@@ -33,6 +39,11 @@ public class ControladorAgent extends Agent {
 
     Controlador controlador;
     AID aeroporto;
+    List<Aviao> Avioes;
+
+    public ControladorAgent() {
+        Avioes = new ArrayList<Aviao>();
+    }
 
     protected void setup() {
         Object[] args = getArguments();
@@ -44,6 +55,11 @@ public class ControladorAgent extends Agent {
                 controlador.setNome((String) args[0]);
 
                 System.out.println("Controlador " + controlador.getNome() + " operando");
+
+                // Register the codec for the SL0 language
+                getContentManager().registerLanguage(new SLCodec(), FIPANames.ContentLanguage.FIPA_SL0);
+
+                getContentManager().registerOntology(CAIAJaOntologia.getInstance());
 
                 DFAgentDescription dfd = new DFAgentDescription();
                 dfd.setName(getAID());
@@ -61,13 +77,50 @@ public class ControladorAgent extends Agent {
                 addBehaviour(new BuscarEmprego(this, 2000));
 
                 addBehaviour(new RequisicoesDePropostas());
+                addBehaviour(new VerificaOntologia());
             }
         }
     }
 
     protected void takeDown() {
-        // Printout a dismissal message
         System.out.println("Controlador " + controlador.getNome() + " saindo de operação.");
+    }
+
+    private class VerificaOntologia extends Behaviour {
+
+        boolean done = false;
+
+        @Override
+        public void action() {
+            System.out.println("Checa ontologia");
+
+            // Create an object representing the fact that person p works for company c
+            ControladoPor ctrl = new ControladoPor();
+            ctrl.setAeroporto(null);
+            ctrl.setControlador(controlador);
+
+            Ontology o = myAgent.getContentManager().lookupOntology(CAIAJaOntologia.NAME);
+            // Create an ACL message to query the engager agent if the above fact is true or false
+            ACLMessage queryMsg = new ACLMessage(ACLMessage.QUERY_IF);
+            queryMsg.addReceiver(((ControladorAgent) myAgent).aeroporto);
+            queryMsg.setLanguage(FIPANames.ContentLanguage.FIPA_SL0);
+            queryMsg.setOntology(CAIAJaOntologia.NAME);
+            // Write the works for predicate in the :content slot of the message
+
+            try {
+                myAgent.getContentManager().fillContent(queryMsg, ctrl);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            done = true;
+        }
+
+        @Override
+        public boolean done() {
+            return done;
+        }
+
     }
 
     private class BuscarEmprego extends TickerBehaviour {
@@ -117,11 +170,11 @@ public class ControladorAgent extends Agent {
         public void action() {
             switch (estado) {
                 case 0: {
-                    System.out.println(getName() + ": Estado 0");
+                    System.out.println(controlador.getNome() + ": Estado 0");
                     ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
 
                     for (AID aerosporto : aerosportos) {
-                        System.out.println(getName() + " --> " + aerosporto.getName());
+                        System.out.println(controlador.getNome() + " --> " + aerosporto.getName());
                         cfp.addReceiver(aerosporto);
                     }
                     cfp.setConversationId("proposta-controlador");
@@ -135,7 +188,7 @@ public class ControladorAgent extends Agent {
                     break;
                 }
                 case 1: {
-                    System.out.println(getName() + ": Estado 1");
+                    System.out.println(controlador.getNome() + ": Estado 1");
                     ACLMessage reply = myAgent.receive(mt);
 
                     if (reply != null) {
@@ -154,7 +207,7 @@ public class ControladorAgent extends Agent {
                     break;
                 }
                 case 2: {
-                    System.out.println(getName() + ": Estado 2");
+                    System.out.println(controlador.getNome() + ": Estado 2");
 
                     ACLMessage controlar = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
                     controlar.addReceiver(Escolhido);
@@ -167,7 +220,7 @@ public class ControladorAgent extends Agent {
                     controlar.setConversationId("proposta-controlador");
                     controlar.setReplyWith("controlar" + System.currentTimeMillis());
                     myAgent.send(controlar);
-                    System.out.println(getName() + " --> " + Escolhido.getName() + ": Aceito Controlar");
+                    System.out.println(controlador.getNome() + " --> " + Escolhido.getName() + ": Aceito Controlar");
 
                     mt = MessageTemplate.and(MessageTemplate.MatchConversationId("proposta-controlador"),
                             MessageTemplate.MatchInReplyTo(controlar.getReplyWith()));
@@ -175,17 +228,17 @@ public class ControladorAgent extends Agent {
                     break;
                 }
                 case 3: {
-                    System.out.println(getName() + ": Estado 3");
+                    System.out.println(controlador.getNome() + ": Estado 3");
 
                     ACLMessage reply = myAgent.receive(mt);
                     if (reply != null) {
                         if (reply.getPerformative() == ACLMessage.INFORM) {
 //                            try {
-                                aeroporto = reply.getSender();
-                                System.out.println(getName() + ": Controlando " + Escolhido.getName());
-                                
+                            aeroporto = reply.getSender();
+                            System.out.println(controlador.getNome() + ": Controlando " + Escolhido.getName());
+
                         } else {
-                            System.out.println(getName() + ": não pode controlar " + Escolhido.getName() + " já conseguiu outro controlador");
+                            System.out.println(controlador.getNome() + ": não pode controlar " + Escolhido.getName() + " já conseguiu outro controlador");
                         }
 
                         estado = 4;
@@ -195,7 +248,7 @@ public class ControladorAgent extends Agent {
                     break;
                 }
                 case 4: {
-                    System.out.println(getName() + ": Estado 4");
+                    System.out.println(controlador.getNome() + ": Estado 4");
                     break;
                 }
             }
@@ -204,6 +257,9 @@ public class ControladorAgent extends Agent {
         @Override
         public boolean done() {
             if (estado == 4) {
+                return true;
+            }
+            if (estado == 2 && Escolhido == null) {
                 return true;
             }
             return false;
