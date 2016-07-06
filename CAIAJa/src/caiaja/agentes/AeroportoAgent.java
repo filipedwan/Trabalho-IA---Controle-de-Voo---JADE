@@ -6,7 +6,9 @@
 package caiaja.agentes;
 
 import caiaja.model.Aeroporto;
+import caiaja.model.Aviao;
 import caiaja.model.Controlador;
+import caiaja.model.Piloto;
 import caiaja.model.Pista;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
@@ -21,6 +23,7 @@ import jade.lang.acl.UnreadableException;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -75,6 +78,16 @@ public class AeroportoAgent extends Agent {
             }
             System.out.println("Aeroporto " + aeroporto.getNome() + " operando");
 
+            String numero = JOptionPane.showInputDialog("Numero de Aeronaves em  " + aeroporto.getNome() + "?");
+
+            try {
+                int naeronaves = Integer.parseInt(numero);
+                for (int i = 0; i < args.length; i++) {
+                    Aviao av = new Aviao("PT-" + ((int) (Math.random() * 3));
+                    aeroporto.addAviao(av);
+                }
+            }
+
             DFAgentDescription dfd = new DFAgentDescription();
             dfd.setName(getAID());
             ServiceDescription sd = new ServiceDescription();
@@ -88,8 +101,11 @@ public class AeroportoAgent extends Agent {
                 fe.printStackTrace();
             }
 
-            addBehaviour(new RequisicoesDePropostas());
+//            addBehaviour(new RequisicoesDePropostas());
+            addBehaviour(new RequisicoesDePropostasControladores());
+            addBehaviour(new RequisicoesDePropostasPilotos());
             addBehaviour(new PropostaControlar());
+            addBehaviour(new PropostaPilotar());
 //            addBehaviour(new ImprimeNome(this, 2000));
         }
 
@@ -129,10 +145,86 @@ public class AeroportoAgent extends Agent {
         }
     }
 
+    /**
+     * Classe para responder aos requerimentos de controladores que precisem de
+     * um aeroporto pra controlar, retonar sim ou não para a requisição
+     */
+    private class RequisicoesDePropostasControladores extends CyclicBehaviour {
+
+        public void action() {
+            MessageTemplate mt = MessageTemplate.and(
+                    MessageTemplate.MatchPerformative(ACLMessage.CFP),
+                    MessageTemplate.MatchConversationId("proposta-controlador")
+            );
+
+            ACLMessage msg = myAgent.receive(mt);
+            if (msg != null) {
+                // CFP Message received. Process it
+                String title = msg.getContent();
+                ACLMessage reply = msg.createReply();
+
+                if (aeroporto.getControlador() == null) {
+                    System.out.println(aeroporto.getNome() + ": Preciso de um controlador");
+                    reply.setPerformative(ACLMessage.PROPOSE);
+                    reply.setContent("Preciso de Cointrolador");
+                } else {
+                    System.out.println(aeroporto.getNome() + ": já tenho um controlador");
+                    reply.setPerformative(ACLMessage.REFUSE);
+                    reply.setContent("ja tenho um controlador");
+                }
+                myAgent.send(reply);
+            } else {
+                block();
+            }
+        }
+    }
+
+    /**
+     * Classe para responder aos requerimentos de controladores que precisem de
+     * um aeroporto pra controlar, retonar sim ou não para a requisição
+     */
+    private class RequisicoesDePropostasPilotos extends CyclicBehaviour {
+
+        public void action() {
+            MessageTemplate mt = MessageTemplate.and(
+                    MessageTemplate.MatchPerformative(ACLMessage.CFP),
+                    MessageTemplate.MatchConversationId("proposta-piloto")
+            );
+
+            ACLMessage msg = myAgent.receive(mt);
+            if (msg != null) {
+                // CFP Message received. Process it
+                String title = msg.getContent();
+                ACLMessage reply = msg.createReply();
+
+                if (aeroporto.getQuantidadeAvioes() > 0) {
+                    System.out.println(aeroporto.getNome() + ": tenho Aeronaves");
+                    reply.setPerformative(ACLMessage.PROPOSE);
+                    reply.setContent("Tenho aeronaves");
+                    try {
+                        reply.setContentObject(new Aviao("pt-alf"));
+                    } catch (Exception e) {
+
+                    }
+                } else {
+                    System.out.println(aeroporto.getNome() + ": não tenho aeronaves disponíveis");
+                    reply.setPerformative(ACLMessage.REFUSE);
+                    reply.setContent("sem avioes");
+                }
+                myAgent.send(reply);
+            } else {
+                block();
+            }
+        }
+    }
+
     private class PropostaControlar extends CyclicBehaviour {
 
         public void action() {
-            MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.ACCEPT_PROPOSAL);
+            MessageTemplate mt = MessageTemplate.and(
+                    MessageTemplate.MatchPerformative(ACLMessage.ACCEPT_PROPOSAL),
+                    MessageTemplate.MatchConversationId("proposta-controlador")
+            );
             ACLMessage msg = myAgent.receive(mt);
             if (msg != null) {
                 String title = msg.getContent();
@@ -140,13 +232,11 @@ public class AeroportoAgent extends Agent {
 
                 if (aeroporto.getControlador() == null) {
                     try {
-//                        System.out.println("Class: " + msg.getContentObject().getClass());
-//                        System.out.println((((Controlador) msg.getContentObject()).getNome()));
                         aeroporto.setControlador((Controlador) msg.getContentObject());
 
                         reply.setPerformative(ACLMessage.INFORM);
                         reply.setContentObject(aeroporto);
-                        System.out.println(aeroporto.getNome()+ ": controlado por " + msg.getSender().getName());
+                        System.out.println(aeroporto.getNome() + ": controlado por " + msg.getSender().getName());
                     } catch (UnreadableException ex) {
                         System.out.println(aeroporto.getNome() + ": erro na msg");
                         reply.setPerformative(ACLMessage.FAILURE);
@@ -156,6 +246,47 @@ public class AeroportoAgent extends Agent {
                     }
                 } else {
                     System.out.println(aeroporto.getNome() + ": arrumou um controlador neste tempo");
+                    reply.setPerformative(ACLMessage.FAILURE);
+                    reply.setContent("not-available");
+                }
+                myAgent.send(reply);
+            } else {
+                block();
+            }
+        }
+    }
+
+    private class PropostaPilotar extends CyclicBehaviour {
+
+        public void action() {
+            MessageTemplate mt = MessageTemplate.and(
+                    MessageTemplate.MatchPerformative(ACLMessage.ACCEPT_PROPOSAL),
+                    MessageTemplate.MatchConversationId("proposta-piloto")
+            );
+            ACLMessage msg = myAgent.receive(mt);
+            if (msg != null) {
+                String title = msg.getContent();
+                ACLMessage reply = msg.createReply();
+
+                if (aeroporto.getQuantidadeAvioes() > 0) {
+                    try {
+                        Piloto pil = (Piloto) msg.getContentObject();
+
+                        Aviao av = aeroporto.getAviao(0);
+
+                        reply.setPerformative(ACLMessage.INFORM);
+                        reply.setContentObject(av);
+                        System.out.println(aeroporto.getNome() + ": aviao para " + pil.getNome());
+
+                    } catch (UnreadableException ex) {
+                        System.out.println(aeroporto.getNome() + ": erro na msg");
+                        reply.setPerformative(ACLMessage.FAILURE);
+                        reply.setContent("error-msg");
+                    } catch (IOException ex) {
+                        Logger.getLogger(AeroportoAgent.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                } else {
+                    System.out.println(aeroporto.getNome() + ": pegaram o aviao neste tempo");
                     reply.setPerformative(ACLMessage.FAILURE);
                     reply.setContent("not-available");
                 }
