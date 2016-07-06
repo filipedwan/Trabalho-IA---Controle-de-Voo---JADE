@@ -59,14 +59,21 @@ public class CAIAJa {
             //AgentController Controlador2 = ac.createNewAgent("Controlador2", "caiaja.agentes.ControladorAgent", new String[]{"cmd Fulano"});
             //Controlador2.start();
             
-            AgentController Piloto = ac.createNewAgent("Piloto", "caiaja.agentes.PilotoAgente", new String[]{"Fulano"});
+            AgentController Piloto = ac.createNewAgent("Piloto", "caiaja.agentes.PilotoAgente", new String[]{"Fernando"});
             Piloto.start();
             
-//            AgentController Piloto1 = ac.createNewAgent("Piloto1", "caiaja.agentes.PilotoAgente", new String[]{"Cicrano"});
-//            Piloto1.start();
+            AgentController Piloto1 = ac.createNewAgent("Piloto1", "caiaja.agentes.PilotoAgente", new String[]{"Filipe"});
+            Piloto1.start();
+            
 //            
-//            AgentController Piloto2 = ac.createNewAgent("Piloto2", "caiaja.agentes.PilotoAgente", new String[]{"Ralano"});
-//            Piloto2.start();
+            AgentController Piloto2 = ac.createNewAgent("Piloto2", "caiaja.agentes.PilotoAgente", new String[]{"Marcelo"});
+            Piloto2.start();
+            
+            AgentController Piloto3 = ac.createNewAgent("Piloto3", "caiaja.agentes.PilotoAgente", new String[]{"Jose"});
+            Piloto3.start();
+            
+            AgentController Piloto4 = ac.createNewAgent("Piloto4", "caiaja.agentes.PilotoAgente", new String[]{"Fulano"});
+            Piloto4.start();
 
             AgentController Estacao = ac.createNewAgent("Estacao", "caiaja.agentes.EstacaoMeteorologicaAgent", new Object[0]);
             Estacao.start();
