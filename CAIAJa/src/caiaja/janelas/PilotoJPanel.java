@@ -6,7 +6,6 @@
 package caiaja.janelas;
 
 import caiaja.agentes.PilotoAgente;
-import org.jdesktop.beansbinding.BindingGroup;
 
 /**
  *
@@ -15,7 +14,6 @@ import org.jdesktop.beansbinding.BindingGroup;
 public class PilotoJPanel extends javax.swing.JPanel {
 
     PilotoAgente pilotoAgente;
-    private BindingGroup bindingGroup;
 
     /**
      * Creates new form PilotoJPanel
