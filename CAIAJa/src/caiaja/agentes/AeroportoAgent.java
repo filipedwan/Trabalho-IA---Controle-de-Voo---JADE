@@ -90,7 +90,7 @@ public class AeroportoAgent extends Agent {
 
             addBehaviour(new RequisicoesDePropostas());
             addBehaviour(new PropostaControlar());
-            addBehaviour(new ImprimeNome(this, 2000));
+//            addBehaviour(new ImprimeNome(this, 2000));
         }
 
     }
@@ -114,11 +114,11 @@ public class AeroportoAgent extends Agent {
                 ACLMessage reply = msg.createReply();
 
                 if (aeroporto.getControlador() == null) {
-                    System.out.println(getName() + ": Preciso de um controlador");
+                    System.out.println(aeroporto.getNome() + ": Preciso de um controlador");
                     reply.setPerformative(ACLMessage.PROPOSE);
                     reply.setContent("Preciso de Cointrolador");
                 } else {
-                    System.out.println(getName() + ": já tenho um controlador");
+                    System.out.println(aeroporto.getNome() + ": já tenho um controlador");
                     reply.setPerformative(ACLMessage.REFUSE);
                     reply.setContent("ja tenho um controlador");
                 }
@@ -140,22 +140,22 @@ public class AeroportoAgent extends Agent {
 
                 if (aeroporto.getControlador() == null) {
                     try {
-                        System.out.println("Class: " + msg.getContentObject().getClass());
+//                        System.out.println("Class: " + msg.getContentObject().getClass());
 //                        System.out.println((((Controlador) msg.getContentObject()).getNome()));
                         aeroporto.setControlador((Controlador) msg.getContentObject());
 
                         reply.setPerformative(ACLMessage.INFORM);
                         reply.setContentObject(aeroporto);
-                        System.out.println(getName() + ": controlado por " + msg.getSender().getName());
+                        System.out.println(aeroporto.getNome()+ ": controlado por " + msg.getSender().getName());
                     } catch (UnreadableException ex) {
-                        System.out.println(getName() + ": erro na msg");
+                        System.out.println(aeroporto.getNome() + ": erro na msg");
                         reply.setPerformative(ACLMessage.FAILURE);
                         reply.setContent("error-msg");
                     } catch (IOException ex) {
                         Logger.getLogger(AeroportoAgent.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 } else {
-                    System.out.println(getName() + ": arrumou um controlador neste tempo");
+                    System.out.println(aeroporto.getNome() + ": arrumou um controlador neste tempo");
                     reply.setPerformative(ACLMessage.FAILURE);
                     reply.setContent("not-available");
                 }
