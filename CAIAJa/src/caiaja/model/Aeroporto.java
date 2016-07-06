@@ -32,11 +32,11 @@ public class Aeroporto implements Serializable, Concept {
         avioes = new java.util.ArrayList<>();
     }
 
-    void addAviao(Aviao aviao) {
+    public void addAviao(Aviao aviao) {
         avioes.add(aviao);
     }
 
-    Aviao pegaAviao(int i) {
+    public Aviao pegaAviao(int i) {
         if (i <= avioes.size()) {
             return avioes.get(i);
         }
