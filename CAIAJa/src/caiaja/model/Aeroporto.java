@@ -21,11 +21,24 @@ public class Aeroporto implements Serializable {
     List<Patio> Patio;
     EstacaoMeteorologica estacaoMeteorologica;
     Controlador controlador;
+    List<Aviao> avioes;
 
     public Aeroporto() {
         Pistas = new java.util.ArrayList<>();
         controlador = null;
         estacaoMeteorologica = null;
+        avioes = new java.util.ArrayList<>();
+    }
+    
+    void addAviao(Aviao aviao) {
+        avioes.add(aviao);
+    }
+    
+    Aviao pegaAviao(int i) {
+        if (i <= avioes.size()) {
+            return avioes.get(i);
+        }
+        return null;
     }
 
     public String getNome() {
