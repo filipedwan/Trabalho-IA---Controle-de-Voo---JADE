@@ -80,8 +80,8 @@ public class ControladorAgent extends Agent {
 
                 addBehaviour(new BuscarEmprego(this, 2000));
 
-//                addBehaviour(new RequisicoesDePropostas());
-//                addBehaviour(new VerificaOntologia(this, 2000));
+                addBehaviour(new RecebePropostaDecolar());
+                addBehaviour(new VerificaOntologia(this, 2000));
                 addBehaviour(new Contato());
             }
         }
@@ -360,6 +360,34 @@ public class ControladorAgent extends Agent {
 
         }
 
+    }
+
+    /**
+     * Classe para responder aos requerimentos de controladores que precisem de
+     * um aeroporto pra controlar, retonar sim ou não para a requisição
+     */
+    private class RecebePropostaDecolar extends CyclicBehaviour {
+
+        public void action() {
+            MessageTemplate mt = MessageTemplate.and(
+                    MessageTemplate.MatchPerformative(ACLMessage.ACCEPT_PROPOSAL),
+                    MessageTemplate.MatchConversationId("proposta-piloto-decolar")
+            );
+            ACLMessage msg = myAgent.receive(mt);
+            if (msg != null) {
+
+                // CFP Message received. Process it
+                String title = msg.getContent();
+                ACLMessage reply = msg.createReply();
+
+                reply.setPerformative(ACLMessage.INFORM);
+
+                System.out.println(controlador.getNome() + ": Pode decolar");
+                myAgent.send(reply);
+            } else {
+                block();
+            }
+        }
     }
 
     /**
