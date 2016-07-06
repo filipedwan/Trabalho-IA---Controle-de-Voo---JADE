@@ -5,15 +5,17 @@
  */
 package caiaja.model;
 
+import jade.content.Concept;
+import java.io.Serializable;
 import java.util.Date;
 
 /**
  *
  * @author fosa
  */
-public class Piloto extends Pessoa {
+public class Piloto extends Pessoa implements Serializable, Concept {
 
     int horasDeVoo;
     Date pilotoDesde;
-    
+
 }

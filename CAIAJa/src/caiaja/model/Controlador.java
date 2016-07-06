@@ -5,13 +5,14 @@
  */
 package caiaja.model;
 
+import jade.content.Concept;
 import java.io.Serializable;
 
 /**
  *
  * @author fosa
  */
-public class Controlador extends Pessoa implements Serializable{
+public class Controlador extends Pessoa implements Serializable, Concept {
 
     Aeroporto Aeroporto;
 

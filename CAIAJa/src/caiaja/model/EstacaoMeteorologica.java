@@ -5,12 +5,13 @@
  */
 package caiaja.model;
 
+import jade.content.Concept;
 import java.io.Serializable;
 
 /**
  *
  * @author fosa
  */
-public class EstacaoMeteorologica implements Serializable{
-    
+public class EstacaoMeteorologica implements Serializable, Concept {
+
 }

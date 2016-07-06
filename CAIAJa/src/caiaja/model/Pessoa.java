@@ -5,6 +5,7 @@
  */
 package caiaja.model;
 
+import jade.content.Concept;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -12,7 +13,7 @@ import java.util.Date;
  *
  * @author fosa
  */
-public class Pessoa implements Serializable{
+public class Pessoa implements Serializable, Concept {
 
     String Nome;
     Date Nascimento;

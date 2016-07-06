@@ -5,13 +5,14 @@
  */
 package caiaja.model;
 
+import jade.content.Concept;
 import java.io.Serializable;
 
 /**
  *
  * @author fosa
  */
-public class Patio implements Serializable {
+public class Patio implements Serializable, Concept {
 
     int capacidade;
 

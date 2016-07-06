@@ -5,13 +5,14 @@
  */
 package caiaja.model;
 
+import jade.content.Concept;
 import java.io.Serializable;
 
 /**
  *
  * @author fosa
  */
-public class Aviao implements Serializable {
+public class Aviao implements Serializable, Concept {
 
     final int PROPULSAO_NENHUMA = 0;
     final int PROPULSAO_PISTAO = 1;
@@ -31,8 +32,6 @@ public class Aviao implements Serializable {
         pistaMinima = 500;
     }
 
-    
-    
     public int getPistaMinima() {
         return pistaMinima;
     }

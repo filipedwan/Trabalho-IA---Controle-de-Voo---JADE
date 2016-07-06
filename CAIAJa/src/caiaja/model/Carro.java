@@ -5,10 +5,13 @@
  */
 package caiaja.model;
 
+import jade.content.Concept;
+import java.io.Serializable;
+
 /**
  *
  * @author fosa
  */
-public class Carro {
-    
+public class Carro implements Serializable, Concept {
+
 }

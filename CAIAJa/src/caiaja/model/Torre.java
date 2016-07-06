@@ -5,10 +5,12 @@
  */
 package caiaja.model;
 
+import jade.content.Concept;
+
 /**
  *
  * @author fosa
  */
-public class Torre {
-    
+public class Torre implements Concept {
+
 }
