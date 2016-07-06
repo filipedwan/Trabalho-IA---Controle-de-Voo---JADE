@@ -62,11 +62,11 @@ public class CAIAJa {
             AgentController Piloto = ac.createNewAgent("Piloto", "caiaja.agentes.PilotoAgente", new String[]{"Fulano"});
             Piloto.start();
             
-            AgentController Piloto1 = ac.createNewAgent("Piloto1", "caiaja.agentes.PilotoAgente", new String[]{"Cicrano"});
-            Piloto1.start();
-            
-            AgentController Piloto2 = ac.createNewAgent("Piloto2", "caiaja.agentes.PilotoAgente", new String[]{"Ralano"});
-            Piloto2.start();
+//            AgentController Piloto1 = ac.createNewAgent("Piloto1", "caiaja.agentes.PilotoAgente", new String[]{"Cicrano"});
+//            Piloto1.start();
+//            
+//            AgentController Piloto2 = ac.createNewAgent("Piloto2", "caiaja.agentes.PilotoAgente", new String[]{"Ralano"});
+//            Piloto2.start();
 
             AgentController Estacao = ac.createNewAgent("Estacao", "caiaja.agentes.EstacaoMeteorologicaAgent", new Object[0]);
             Estacao.start();
