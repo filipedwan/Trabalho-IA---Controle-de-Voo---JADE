@@ -38,6 +38,8 @@ import java.util.logging.Logger;
 public class ControladorAgent extends Agent {
 
     Controlador controlador;
+    Aeroporto aeroporto_m;
+
     AID aeroporto;
     List<Aviao> Avioes;
 
@@ -77,7 +79,7 @@ public class ControladorAgent extends Agent {
                 addBehaviour(new BuscarEmprego(this, 2000));
 
                 addBehaviour(new RequisicoesDePropostas());
-                addBehaviour(new VerificaOntologia());
+                addBehaviour(new VerificaOntologia(this, 2000));
             }
         }
     }
@@ -86,39 +88,37 @@ public class ControladorAgent extends Agent {
         System.out.println("Controlador " + controlador.getNome() + " saindo de operação.");
     }
 
-    private class VerificaOntologia extends Behaviour {
+    private class VerificaOntologia extends TickerBehaviour {
 
         boolean done = false;
 
-        @Override
-        public void action() {
-            System.out.println("Checa ontologia");
-
-            // Create an object representing the fact that person p works for company c
-            ControladoPor ctrl = new ControladoPor();
-            ctrl.setAeroporto(null);
-            ctrl.setControlador(controlador);
-
-            Ontology o = myAgent.getContentManager().lookupOntology(CAIAJaOntologia.NAME);
-            // Create an ACL message to query the engager agent if the above fact is true or false
-            ACLMessage queryMsg = new ACLMessage(ACLMessage.QUERY_IF);
-            queryMsg.addReceiver(((ControladorAgent) myAgent).aeroporto);
-            queryMsg.setLanguage(FIPANames.ContentLanguage.FIPA_SL0);
-            queryMsg.setOntology(CAIAJaOntologia.NAME);
-            // Write the works for predicate in the :content slot of the message
-
-            try {
-                myAgent.getContentManager().fillContent(queryMsg, ctrl);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            done = true;
+        public VerificaOntologia(Agent myAgent, long milis) {
+            super(myAgent, milis);
         }
 
         @Override
-        public boolean done() {
-            return done;
+        protected void onTick() {
+
+            if (aeroporto_m != null) {
+                System.out.println(controlador.getNome()+": Verificando Ontologia ");
+                ControladoPor ctrl = new ControladoPor();
+                ctrl.setAeroporto(aeroporto_m);
+                ctrl.setControlador(controlador);
+
+                Ontology o = myAgent.getContentManager().lookupOntology(CAIAJaOntologia.NAME);
+                // Create an ACL message to query the engager agent if the above fact is true or false
+                ACLMessage queryMsg = new ACLMessage(ACLMessage.QUERY_IF);
+                queryMsg.addReceiver(((ControladorAgent) myAgent).aeroporto);
+                queryMsg.setLanguage(FIPANames.ContentLanguage.FIPA_SL0);
+                queryMsg.setOntology(CAIAJaOntologia.NAME);
+                // Write the works for predicate in the :content slot of the message
+
+                try {
+                    myAgent.getContentManager().fillContent(queryMsg, ctrl);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         }
 
     }
@@ -259,7 +259,7 @@ public class ControladorAgent extends Agent {
             if (estado == 4) {
                 return true;
             }
-            if (estado == 2 && Escolhido == null) {
+            if (estado > 1 && Escolhido == null) {
                 return true;
             }
             return false;
