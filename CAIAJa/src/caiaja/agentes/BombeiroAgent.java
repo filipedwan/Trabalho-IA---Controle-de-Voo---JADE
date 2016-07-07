@@ -5,6 +5,7 @@
  */
 package caiaja.agentes;
 
+import caiaja.CAIAJa;
 import caiaja.model.Aeroporto;
 import caiaja.model.Bombeiro;
 import jade.core.AID;
@@ -49,21 +50,9 @@ public class BombeiroAgent extends Agent {
                 bombeiro.setNome((String) args[0]);
 
                 System.out.println("Bombeiro " + bombeiro.getNome() + " aguardando trabalho");
-                //System.out.println("Bombeiro " + bombeiro.getNome() + " procurando aviao pegando fogo");
 
-                DFAgentDescription dfd = new DFAgentDescription();
-                dfd.setName(getAID());
-                ServiceDescription sd = new ServiceDescription();
-                sd.setType("Bombeiro");
-                sd.setName(bombeiro.getNome());
-                dfd.addServices(sd);
-
-                try {
-                    DFService.register(this, dfd);
-                } catch (FIPAException fe) {
-                    fe.printStackTrace();
-                }
-
+                CAIAJa.registrarServico(this, "Bombeiro", bombeiro.getNome());
+                
                 addBehaviour(new BombeiroAgent.BuscarEmprego(this, 5000));
 
                 addBehaviour(new BombeiroAgent.AguardaAlertaDeIncendio());
@@ -80,22 +69,7 @@ public class BombeiroAgent extends Agent {
         @Override
         protected void onTick() {
             if (aeroporto_base == null) {
-                DFAgentDescription template = new DFAgentDescription();
-                ServiceDescription sd = new ServiceDescription();
-                sd.setType("Aeroporto");
-                template.addServices(sd);
-
-                List<AID> aerosportos = new ArrayList<AID>();
-                try {
-                    DFAgentDescription[] result = DFService.search(myAgent, template);
-                    for (int i = 0; i < result.length; ++i) {
-                        aerosportos.add(result[i].getName());
-                    }
-                } catch (FIPAException fe) {
-                    fe.printStackTrace();
-                }
-
-                myAgent.addBehaviour(new BombeiroAgent.PropoeTrabalhar(aerosportos));
+                myAgent.addBehaviour(new BombeiroAgent.PropoeTrabalhar(CAIAJa.getServico(myAgent, "Aeroporto")));
             } else {
                 System.out.println("Bombeiro " + bombeiro.getNome() + ": trabalhando em " + aeroporto_base.getNome());
 
@@ -187,12 +161,6 @@ public class BombeiroAgent extends Agent {
                             aeroporto = reply.getSender();
                             System.out.println("Bombeiro " + bombeiro.getNome() + ": trabalhando para o  " + aeroporto.getLocalName());
 
-                            //try {
-                            //    aviao = ((Aviao) reply.getContentObject());
-                            //    System.out.println(bombeiro.getNome() + ": trabalhando para o  " + aeroporto_atual.getNome());
-                            //} catch (UnreadableException ex) {
-                            //    Logger.getLogger(PilotoAgent.class.getName()).log(Level.SEVERE, null, ex);
-                            //}
                         } else {
                             System.out.println("Bombeiro " + bombeiro.getNome() + ": não foi contratado por " + Escolhido.getName() + " já conseguiu outro bombeiro");
                         }
@@ -238,6 +206,8 @@ public class BombeiroAgent extends Agent {
                 // CFP Message received. Process it
                 String title = msg.getContent();
                 ACLMessage reply = msg.createReply();
+                
+                reply.setContent("Ainda não sei apagar fogo :(");
 
                 myAgent.send(reply);
             } else {
