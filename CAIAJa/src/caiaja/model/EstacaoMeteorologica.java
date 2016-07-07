@@ -14,10 +14,10 @@ import java.io.Serializable;
  */
 public class EstacaoMeteorologica implements Serializable, Concept {
     
-    private float taxaNeblina; //------------------------------
+    private float taxaNeblina; //--------------------------------------------------------
     private float taxaFumaca;  // porcentagens de 0 a 100
-    private float taxaAves;    // obs: se pelo menos um animaal
-    private float taxaAnimais; //------------------------------
+    private float taxaAves;    // obs: se pelo menos um animal na pista, nao pode decolar
+    private float taxaAnimais; //--------------------------------------------------------
 
     public float getTaxaNeblina() {
         return taxaNeblina;
