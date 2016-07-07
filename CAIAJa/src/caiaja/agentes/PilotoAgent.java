@@ -83,16 +83,16 @@ public class PilotoAgent extends Agent {
                 getContentManager().registerLanguage(new SLCodec(), FIPANames.ContentLanguage.FIPA_SL0);
                 getContentManager().registerOntology(CAIAJaOntologia.getInstance());
 
-                addBehaviour(new PilotoAgent.BuscarEmprego(this, 5000));
+                addBehaviour(new PilotoAgent.BuscarAtividade(this, 5000));
 
                 addBehaviour(new PilotoAgent.RequisicoesDePropostas());
             }
         }
     }
 
-    private class BuscarEmprego extends TickerBehaviour {
+    private class BuscarAtividade extends TickerBehaviour {
 
-        public BuscarEmprego(Agent a, long period) {
+        public BuscarAtividade(Agent a, long period) {
             super(a, period);
         }
 
