@@ -10,9 +10,20 @@ import caiaja.model.Aviao;
 import caiaja.model.Controlador;
 import caiaja.model.Piloto;
 import caiaja.ontologia.CAIAJaOntologia;
+import caiaja.ontologia.acoes.Decolar;
+import caiaja.ontologia.predicados.Controla;
 import caiaja.ontologia.predicados.ControladoPor;
+import jade.content.ContentElementList;
+import jade.content.Predicate;
+import jade.content.abs.AbsPredicate;
+import jade.content.lang.Codec;
 import jade.content.lang.sl.SLCodec;
+import jade.content.lang.sl.SLVocabulary;
 import jade.content.onto.Ontology;
+import jade.content.onto.OntologyException;
+import jade.content.onto.basic.Action;
+import jade.content.onto.basic.Done;
+import jade.content.onto.basic.TrueProposition;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
@@ -26,6 +37,8 @@ import jade.domain.FIPANames;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.lang.acl.UnreadableException;
+import jade.proto.SimpleAchieveREResponder;
+import jade.util.leap.Iterator;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -81,14 +94,211 @@ public class ControladorAgent extends Agent {
                 addBehaviour(new BuscarEmprego(this, 2000));
 
                 addBehaviour(new RecebePropostaDecolar());
-                addBehaviour(new VerificaOntologia(this, 2000));
+                addBehaviour(new VerificaOntologia(this, 5000));
                 addBehaviour(new Contato());
+
+                // Create and add the behaviour for handling QUERIES using the employment-ontology
+                addBehaviour(new TratarControladorConsultasBehaviour(this));
+
+                // Create and add the behaviour for handling REQUESTS using the employment-ontology
+                MessageTemplate mt = MessageTemplate.and(
+                        MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST),
+                        MessageTemplate.MatchOntology(CAIAJaOntologia.NAME));
+                TratarControladorConsultasBehaviour b = new TratarControladorConsultasBehaviour(this);
+                TrataRequisicoesDecolar c = new TrataRequisicoesDecolar(this);
+
+                addBehaviour(b);
+                addBehaviour(c);
             }
         }
     }
 
     protected void takeDown() {
         System.out.println("Controlador " + controlador.getNome() + " saindo de operação.");
+    }
+
+    int Decolar(Aviao aviao, Aeroporto aero) {
+        if (aeroporto_m.equals(aero)) {
+            return 1;
+        }
+        return 0;
+    }
+
+    boolean Controla(Controlador con, Aeroporto aero) {
+        if (controlador.equals(con) && aeroporto_m.equals(aero)) {
+            return true;
+        }
+        return false;
+    }
+
+    class TratarControladorConsultasBehaviour extends SimpleAchieveREResponder {
+
+        /**
+         *
+         * @param myAgent The agent owning this behaviour
+         */
+        public TratarControladorConsultasBehaviour(Agent myAgent) {
+            super(myAgent, MessageTemplate.and(
+                    MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_QUERY),
+                    MessageTemplate.MatchOntology(CAIAJaOntologia.NAME)));
+        }
+
+        /**
+         * This method is called when a QUERY-IF or QUERY-REF message is
+         * received.
+         *
+         * @param msg The received query message
+         * @return The ACL message to be sent back as reply
+         * @see jade.proto.FipaQueryResponderBehaviour
+         */
+        @Override
+        public ACLMessage prepareResponse(ACLMessage msg) {
+
+            ACLMessage reply = msg.createReply();
+
+            // The QUERY message could be a QUERY-REF. In this case reply 
+            // with NOT_UNDERSTOOD
+            if (msg.getPerformative() != ACLMessage.QUERY_IF) {
+                reply.setPerformative(ACLMessage.NOT_UNDERSTOOD);
+                String content = "(" + msg.toString() + ")";
+                reply.setContent(content);
+                return (reply);
+            }
+
+            try {
+                // Get the predicate for which the truth is queried	
+                Predicate pred = (Predicate) myAgent.getContentManager().extractContent(msg);
+                if (!(pred instanceof ControladoPor)) {
+                    // If the predicate for which the truth is queried is not WORKS_FOR
+                    // reply with NOT_UNDERSTOOD
+                    reply.setPerformative(ACLMessage.NOT_UNDERSTOOD);
+                    String content = "(" + msg.toString() + ")";
+                    reply.setContent(content);
+                    return (reply);
+                }
+
+                // Reply 
+                reply.setPerformative(ACLMessage.INFORM);
+                Controla contr = (Controla) pred;
+                Controlador con = contr.getControlador();
+                Aeroporto aero = contr.getAeroporto();
+                if (((ControladorAgent) myAgent).Controla(con, aero)) {
+                    reply.setContent(msg.getContent());
+                } else {
+                    // Create an object representing the fact that the WORKS_FOR 
+                    // predicate is NOT true.
+                    Ontology o = getContentManager().lookupOntology(CAIAJaOntologia.NAME);
+                    AbsPredicate not = new AbsPredicate(SLVocabulary.NOT);
+                    not.set(SLVocabulary.NOT_WHAT, o.fromObject(contr));
+                    myAgent.getContentManager().fillContent(reply, not);
+                }
+            } catch (Codec.CodecException fe) {
+                System.err.println(myAgent.getLocalName() + " Fill/extract content unsucceeded. Reason:" + fe.getMessage());
+            } catch (OntologyException oe) {
+                System.err.println(myAgent.getLocalName() + " getRoleName() unsucceeded. Reason:" + oe.getMessage());
+            }
+
+            return (reply);
+
+        }
+
+    }
+
+    /**
+     * This behaviour handles a single engagement action that has been requested
+     * following the FIPA-Request protocol
+     */
+    class TrataRequisicoesDecolar extends SimpleAchieveREResponder {
+
+        /**
+         * Constructor for the <code>HandleEngageBehaviour</code> class.
+         *
+         * @param myAgent The agent owning this behaviour
+         * @param requestMsg The ACL message by means of which the engagement
+         * action has been requested
+         */
+        public TrataRequisicoesDecolar(Agent myAgent) {
+            super(myAgent, MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST));
+        }
+
+        /**
+         * This method implements the
+         * <code>FipaRequestResponderBehaviour.Factory</code> interface. It will
+         * be called within a <code>FipaRequestResponderBehaviour</code> when an
+         * engagement action is requested to instantiate a new
+         * <code>HandleEngageBehaviour</code> handling the requested action
+         *
+         * @param msg The ACL message by means of which the engagement action
+         * has been requested
+         */
+        @Override
+        public ACLMessage prepareResultNotification(ACLMessage request, ACLMessage response) {
+            // Prepare a dummy ACLMessage used to create the content of all reply messages
+            ACLMessage msg = request.createReply();
+
+            try {
+                // Get the requested action
+                Action a = (Action) myAgent.getContentManager().extractContent(request);
+                Decolar dec = (Decolar) a.getAction();
+                Piloto pil = dec.getPiloto();
+                Aviao av = dec.getAviao();
+                Aeroporto aero = dec.getAeroporto();
+
+                // Perform the engagement action
+                int result = ((ControladorAgent) myAgent).Decolar(av, aero);
+
+                // Reply according to the result
+                if (result > 0) {
+                    // OK --> INFORM action done
+                    Done d = new Done();
+                    d.setAction(a);
+                    myAgent.getContentManager().fillContent(msg, d);
+                    msg.setPerformative(ACLMessage.INFORM);
+                } else {
+                    // NOT OK --> FAILURE
+                    ContentElementList l = new ContentElementList();
+                    l.add(a);
+//                    l.add(new EngagementError());
+                    myAgent.getContentManager().fillContent(msg, l);
+                    msg.setPerformative(ACLMessage.FAILURE);
+                }
+
+            } catch (Exception fe) {
+                System.out.println(myAgent.getName() + ": Error ao tratar decolar");
+                System.out.println(fe.getMessage());
+            }
+
+            // System.out.println(msg);
+            return msg;
+        }
+
+        @Override
+        public ACLMessage prepareResponse(ACLMessage request) {
+            // Prepare a dummy ACLMessage used to create the content of all reply messages
+            ACLMessage temp = request.createReply();
+
+            try {
+                // Get the requested action. 
+                Action a = (Action) getContentManager().extractContent(request);
+                Decolar dec = (Decolar) a.getAction();
+                Piloto pil = dec.getPiloto();
+                Aviao av = dec.getAviao();
+                Aeroporto aero = dec.getAeroporto();
+
+                ContentElementList l = new ContentElementList();
+                l.add(a);
+                l.add(new TrueProposition());
+                getContentManager().fillContent(temp, l);
+                temp.setPerformative(ACLMessage.AGREE);
+
+            } catch (Exception fe) {
+                fe.printStackTrace();
+                System.out.println(getName() + ": Error na acao decolar.");
+                System.out.println(fe.getMessage());
+            }
+
+            return temp;
+        }
     }
 
     private class VerificaOntologia extends TickerBehaviour {

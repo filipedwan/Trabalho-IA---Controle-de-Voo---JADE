@@ -5,6 +5,7 @@
  */
 package caiaja.ontologia.acoes;
 
+import caiaja.model.Aeroporto;
 import caiaja.model.Aviao;
 import caiaja.model.Piloto;
 import jade.content.Concept;
@@ -18,6 +19,7 @@ public class Decolar implements Concept {
 
     private Aviao _aviao;
     private Piloto _piloto;
+    private Aeroporto _aeroporto;
     private AID _actor;
 
     public void setPiloto(Piloto piloto) {
@@ -34,6 +36,14 @@ public class Decolar implements Concept {
 
     public Aviao getAviao() {
         return _aviao;
+    }
+
+    public Aeroporto getAeroporto() {
+        return _aeroporto;
+    }
+
+    public void setAeroporto(Aeroporto aeroporto) {
+        this._aeroporto = aeroporto;
     }
 
 }

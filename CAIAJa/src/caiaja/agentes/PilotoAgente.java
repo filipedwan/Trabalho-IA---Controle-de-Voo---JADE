@@ -9,19 +9,27 @@ import caiaja.model.Aeroporto;
 import caiaja.model.Aviao;
 import caiaja.model.Controlador;
 import caiaja.model.Piloto;
+import caiaja.ontologia.CAIAJaOntologia;
+import caiaja.ontologia.acoes.Decolar;
+import jade.content.lang.sl.SLCodec;
+import jade.content.onto.Ontology;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
+import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.TickerBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
+import jade.domain.FIPANames;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.lang.acl.UnreadableException;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -69,6 +77,9 @@ public class PilotoAgente extends Agent {
                     fe.printStackTrace();
                 }
 
+                getContentManager().registerLanguage(new SLCodec(), FIPANames.ContentLanguage.FIPA_SL0);
+                getContentManager().registerOntology(CAIAJaOntologia.getInstance());
+
                 addBehaviour(new PilotoAgente.BuscarEmprego(this, 5000));
 
                 addBehaviour(new PilotoAgente.RequisicoesDePropostas());
@@ -103,7 +114,6 @@ public class PilotoAgente extends Agent {
 
                 myAgent.addBehaviour(new PilotoAgente.PropoePilotar(aerosportos));
             } else {
-
                 List<AID> Controladores = new ArrayList<AID>();
                 if (Controlador == null) {
                     DFAgentDescription template = new DFAgentDescription();
@@ -248,6 +258,48 @@ public class PilotoAgente extends Agent {
                 return true;
             }
             return false;
+        }
+
+    }
+
+    private class acaoDecolar extends OneShotBehaviour {
+
+        // Local variables
+        Behaviour queryBehaviour = null;
+        Behaviour requestBehaviour = null;
+
+        // Constructor
+        public acaoDecolar(Agent myAgent) {
+            super(myAgent);
+        }
+
+        @Override
+        public void action() {
+//            try {
+            Decolar dec = new Decolar();
+            dec.setAviao(((PilotoAgente) myAgent).aviao);
+            dec.setAeroporto(((PilotoAgente) myAgent).aeroporto_atual);
+
+            Ontology o = myAgent.getContentManager().lookupOntology(CAIAJaOntologia.NAME);
+                // Create an ACL message to query the engager agent if the above fact is true or false
+//                ACLMessage queryMsg = new ACLMessage(ACLMessage.QUERY_IF);
+//                queryMsg.addReceiver(((PilotoAgente) myAgent).Controlador);
+//                queryMsg.setLanguage(FIPANames.ContentLanguage.FIPA_SL0);
+//                queryMsg.setOntology(CAIAJaOntologia.NAME);
+            // Write the works for predicate in the :content slot of the message
+
+//                try {
+//                    myAgent.getContentManager().fillContent(queryMsg, dec);
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+                // Create and add a behaviour to query the engager agent whether
+            // person p already works for company c following a FIPAQeury protocol
+//                queryBehaviour = new CheckAlreadyWorkingBehaviour(myAgent, queryMsg);
+//                addSubBehaviour(queryBehaviour);
+//            } catch (IOException ioe) {
+//                System.err.println("I/O error: " + ioe.getMessage());
+//            }
         }
 
     }

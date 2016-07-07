@@ -10,6 +10,10 @@ import caiaja.model.Aviao;
 import caiaja.model.Controlador;
 import caiaja.model.Piloto;
 import caiaja.model.Pista;
+import jade.content.ContentElementList;
+import jade.content.onto.basic.Action;
+import jade.content.onto.basic.Done;
+import jade.content.onto.basic.TrueProposition;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.TickerBehaviour;
@@ -17,9 +21,11 @@ import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
+import jade.domain.FIPANames;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.lang.acl.UnreadableException;
+import jade.proto.SimpleAchieveREResponder;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -116,7 +122,7 @@ public class AeroportoAgent extends Agent {
 
     protected void takeDown() {
         System.out.println("Controlador " + aeroporto.getNome() + " saindo de operação.");
-    }
+    }    
 
     /**
      * Classe para responder aos requerimentos de controladores que precisem de

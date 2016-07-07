@@ -122,6 +122,11 @@ public class CAIAJaOntologia extends BeanOntology {
             cs.add(AEROPORTO_PREFIXO, (PrimitiveSchema) getSchema(BasicOntology.STRING));
             cs.add(AEROPORTO_COTROLADOR, (ConceptSchema) getSchema(CONTROLADOR));
 
+            //Acoes            
+            AgentActionSchema as = (AgentActionSchema) getSchema(DECOLAR);
+            as.add(DECOLAR_AVIAO, (ConceptSchema) getSchema(AVIAO));
+            as.add(DECOLAR_DO_AEROPORTO, (ConceptSchema) getSchema(AEROPORTO));
+
             //Predicados            
             PredicateSchema ps = (PredicateSchema) getSchema(PILOTA);
             ps.add(PILOTA_PILOTO, (ConceptSchema) getSchema(PILOTO));
