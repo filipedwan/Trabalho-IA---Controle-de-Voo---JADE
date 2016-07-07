@@ -5,7 +5,7 @@
  */
 package caiaja.janelas;
 
-import caiaja.agentes.PilotoAgente;
+import caiaja.agentes.PilotoAgent;
 
 /**
  *
@@ -13,12 +13,12 @@ import caiaja.agentes.PilotoAgente;
  */
 public class PilotoJPanel extends javax.swing.JPanel {
 
-    PilotoAgente pilotoAgente;
+    PilotoAgent pilotoAgente;
 
     /**
      * Creates new form PilotoJPanel
      */
-    public PilotoJPanel(PilotoAgente piloto) {
+    public PilotoJPanel(PilotoAgent piloto) {
         pilotoAgente = piloto;
 
         initComponents();

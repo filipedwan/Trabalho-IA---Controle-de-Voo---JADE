@@ -39,7 +39,7 @@ import java.util.logging.Logger;
  *
  * @author ufrr
  */
-public class PilotoAgente extends Agent {
+public class PilotoAgent extends Agent {
 
     private Piloto piloto;
     private Aviao aviao;
@@ -80,9 +80,9 @@ public class PilotoAgente extends Agent {
                 getContentManager().registerLanguage(new SLCodec(), FIPANames.ContentLanguage.FIPA_SL0);
                 getContentManager().registerOntology(CAIAJaOntologia.getInstance());
 
-                addBehaviour(new PilotoAgente.BuscarEmprego(this, 5000));
+                addBehaviour(new PilotoAgent.BuscarEmprego(this, 5000));
 
-                addBehaviour(new PilotoAgente.RequisicoesDePropostas());
+                addBehaviour(new PilotoAgent.RequisicoesDePropostas());
             }
         }
     }
@@ -112,7 +112,7 @@ public class PilotoAgente extends Agent {
                     fe.printStackTrace();
                 }
 
-                myAgent.addBehaviour(new PilotoAgente.PropoePilotar(aerosportos));
+                myAgent.addBehaviour(new PilotoAgent.PropoePilotar(aerosportos));
             } else {
                 List<AID> Controladores = new ArrayList<AID>();
                 if (Controlador == null) {
@@ -137,7 +137,7 @@ public class PilotoAgente extends Agent {
                     System.out.println(piloto.getNome() + ": Em voo com " + aviao.getPrefixo());
                 } else {
                     if (aeroporto_atual != null) {
-                        myAgent.addBehaviour(new PilotoAgente.PropoeDecolar(Controladores));
+                        myAgent.addBehaviour(new PilotoAgent.PropoeDecolar(Controladores));
                     }
                 }
             }
@@ -189,7 +189,7 @@ public class PilotoAgente extends Agent {
                             try {
                                 aeroporto_atual = (Aeroporto) reply.getContentObject();
                             } catch (UnreadableException ex) {
-                                Logger.getLogger(PilotoAgente.class.getName()).log(Level.SEVERE, null, ex);
+                                Logger.getLogger(PilotoAgent.class.getName()).log(Level.SEVERE, null, ex);
                             }
                         }
 
@@ -230,7 +230,7 @@ public class PilotoAgente extends Agent {
                                 aviao = ((Aviao) reply.getContentObject());
                                 System.out.println(piloto.getNome() + ": Pilotando " + aviao.getPrefixo());
                             } catch (UnreadableException ex) {
-                                Logger.getLogger(PilotoAgente.class.getName()).log(Level.SEVERE, null, ex);
+                                Logger.getLogger(PilotoAgent.class.getName()).log(Level.SEVERE, null, ex);
                             }
 
                         } else {
@@ -277,13 +277,13 @@ public class PilotoAgente extends Agent {
         public void action() {
 //            try {
             Decolar dec = new Decolar();
-            dec.setAviao(((PilotoAgente) myAgent).aviao);
-            dec.setAeroporto(((PilotoAgente) myAgent).aeroporto_atual);
+            dec.setAviao(((PilotoAgent) myAgent).aviao);
+            dec.setAeroporto(((PilotoAgent) myAgent).aeroporto_atual);
 
             Ontology o = myAgent.getContentManager().lookupOntology(CAIAJaOntologia.NAME);
                 // Create an ACL message to query the engager agent if the above fact is true or false
 //                ACLMessage queryMsg = new ACLMessage(ACLMessage.QUERY_IF);
-//                queryMsg.addReceiver(((PilotoAgente) myAgent).Controlador);
+//                queryMsg.addReceiver(((PilotoAgent) myAgent).Controlador);
 //                queryMsg.setLanguage(FIPANames.ContentLanguage.FIPA_SL0);
 //                queryMsg.setOntology(CAIAJaOntologia.NAME);
             // Write the works for predicate in the :content slot of the message
@@ -353,7 +353,7 @@ public class PilotoAgente extends Agent {
                             try {
                                 Controlador_model = (Controlador) reply.getContentObject();
                             } catch (UnreadableException ex) {
-                                Logger.getLogger(PilotoAgente.class.getName()).log(Level.SEVERE, null, ex);
+                                Logger.getLogger(PilotoAgent.class.getName()).log(Level.SEVERE, null, ex);
                             }
                             estado = 2;
                         } else {

@@ -5,7 +5,7 @@
  */
 package caiaja.janelas;
 
-import caiaja.agentes.PilotoAgente;
+import caiaja.agentes.PilotoAgent;
 import caiaja.model.Piloto;
 import jade.core.Profile;
 import jade.wrapper.AgentContainer;
@@ -207,7 +207,7 @@ public class CaiaJaJanela extends javax.swing.JFrame {
             Logger.getLogger(CaiaJaJanela.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        PilotosjTabbedPane.add(new PilotoJPanel((PilotoAgente) Piloto1));
+        PilotosjTabbedPane.add(new PilotoJPanel((PilotoAgent) Piloto1));
     }//GEN-LAST:event_PilotoNovojButtonActionPerformed
 
     /**

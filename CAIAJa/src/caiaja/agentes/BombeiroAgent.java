@@ -185,7 +185,7 @@ public class BombeiroAgent extends Agent {
                             try {
                                 aeroporto_atual = (Aeroporto) reply.getContentObject();
                             } catch (UnreadableException ex) {
-                                Logger.getLogger(PilotoAgente.class.getName()).log(Level.SEVERE, null, ex);
+                                Logger.getLogger(PilotoAgent.class.getName()).log(Level.SEVERE, null, ex);
                             }
                         }
 
@@ -228,7 +228,7 @@ public class BombeiroAgent extends Agent {
                             //    aviao = ((Aviao) reply.getContentObject());
                             //    System.out.println(bombeiro.getNome() + ": trabalhando para o  " + aeroporto_atual.getNome());
                             //} catch (UnreadableException ex) {
-                            //    Logger.getLogger(PilotoAgente.class.getName()).log(Level.SEVERE, null, ex);
+                            //    Logger.getLogger(PilotoAgent.class.getName()).log(Level.SEVERE, null, ex);
                             //}
 
                         } else {
@@ -309,7 +309,7 @@ public class BombeiroAgent extends Agent {
                             try {
                                 Controlador_model = (Controlador) reply.getContentObject();
                             } catch (UnreadableException ex) {
-                                Logger.getLogger(PilotoAgente.class.getName()).log(Level.SEVERE, null, ex);
+                                Logger.getLogger(PilotoAgent.class.getName()).log(Level.SEVERE, null, ex);
                             }
                             estado = 2;
                         } else {
