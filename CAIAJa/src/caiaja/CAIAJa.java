@@ -7,10 +7,6 @@ package caiaja;
 // macelo testando gitHub clone commit
 // -----------------------------------
 
-import caiaja.agentes.AeroportoAgent;
-import caiaja.agentes.BombeiroAgent;
-import caiaja.agentes.ControladorAgent;
-import caiaja.agentes.PilotoAgent;
 import jade.core.Profile;
 import jade.core.ProfileImpl;
 import jade.util.ExtendedProperties;
@@ -47,6 +43,8 @@ public class CAIAJa {
             jade.core.Runtime.instance().createAgentContainer(p);
         }
 
+        List<AgentController> Agentes = new ArrayList<>();
+
         List<String> Pilotos = new ArrayList<>();
         List<String> Controladores = new ArrayList<>();
         List<String> Bombeiros = new ArrayList<>();
@@ -59,36 +57,44 @@ public class CAIAJa {
 
         Bombeiros.add("Carlos");
 
+        /**
+         * Inicializando Agentes
+         */
+        try {
+
+            AgentController Aeroporto = ac.createNewAgent("AeroportoSBBV", "caiaja.agentes.AeroportoAgent", new String[]{"", "SBBV", "Atlas Brasil Catanhede", "2700"});
+            Aeroporto.start();
+
+            for (String piloto : Pilotos) {
+                AgentController Piloto = ac.createNewAgent("p_" + piloto, "caiaja.agentes.PilotoAgent", new String[]{piloto});
+                Agentes.add(Piloto);
+            }
+            for (String Controlador : Controladores) {
+                AgentController Controlador1 = ac.createNewAgent("c_" + Controlador, "caiaja.agentes.ControladorAgent", new String[]{Controlador});
+                Agentes.add(Controlador1);
+            }
+
+            for (String bombeiro : Bombeiros) {
+                AgentController Bombeiros1 = ac.createNewAgent("b_" + bombeiro, "caiaja.agentes.BombeiroAgent", new String[]{bombeiro});
+                Agentes.add(Bombeiros1);
+            }
+
+        } catch (StaleProxyException ex) {
+            Logger.getLogger(CAIAJa.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
         try {
             Thread.sleep(20000);
         } catch (InterruptedException ex) {
             Logger.getLogger(CAIAJa.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        /**
-         * Inicializando Agentes
-         */
-        try {
-
-            AgentController Aeroporto = ac.createNewAgent("AeroportoSBBV", AeroportoAgent.class + "", new String[]{"", "SBBV", "Atlas Brasil Catanhede", "2700"});
-            Aeroporto.start();
-
-            for (String piloto : Pilotos) {
-                AgentController Piloto = ac.createNewAgent("p_" + piloto, PilotoAgent.class + "", new String[]{piloto});
-                Piloto.start();
+        for (AgentController Agente : Agentes) {
+            try {
+                Agente.start();
+            } catch (StaleProxyException ex) {
+                Logger.getLogger(CAIAJa.class.getName()).log(Level.SEVERE, null, ex);
             }
-            for (String Controlador : Controladores) {
-                AgentController Controlador1 = ac.createNewAgent("c_" + Controlador, ControladorAgent.class + "", new String[]{Controlador});
-                Controlador1.start();
-            }
-
-            for (String bombeiro : Bombeiros) {
-                AgentController Bombeiros1 = ac.createNewAgent("b_" + bombeiro, BombeiroAgent.class + "", new String[]{bombeiro});
-                Bombeiros1.start();
-            }
-
-        } catch (StaleProxyException ex) {
-            Logger.getLogger(CAIAJa.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
