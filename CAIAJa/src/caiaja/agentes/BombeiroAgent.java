@@ -32,7 +32,7 @@ import java.util.logging.Logger;
  *
  * @author ufrr
  */
-public class AgenteBombeiro extends Agent {
+public class BombeiroAgent extends Agent {
     
     private Bombeiro bombeiro;
     private Aviao aviao;
@@ -71,9 +71,9 @@ public class AgenteBombeiro extends Agent {
                     fe.printStackTrace();
                 }
 
-                addBehaviour(new AgenteBombeiro.BuscarEmprego(this, 60000));
+                addBehaviour(new BombeiroAgent.BuscarEmprego(this, 60000));
 
-                addBehaviour(new AgenteBombeiro.RequisicoesDePropostas());
+                addBehaviour(new BombeiroAgent.RequisicoesDePropostas());
             }
         }
     }
@@ -103,9 +103,9 @@ public class AgenteBombeiro extends Agent {
                     fe.printStackTrace();
                 }
 
-                myAgent.addBehaviour(new AgenteBombeiro.PropoeTrabalhar(aerosportos));
+                myAgent.addBehaviour(new BombeiroAgent.PropoeTrabalhar(aerosportos));
                 if (aeroporto_atual != null) {
-                        myAgent.addBehaviour(new AgenteBombeiro.PropoeApagarFogo(aerosportos));
+                        myAgent.addBehaviour(new BombeiroAgent.PropoeApagarFogo(aerosportos));
                     }
             } 
 //            else {
