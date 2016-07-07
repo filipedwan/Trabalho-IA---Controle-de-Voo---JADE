@@ -18,6 +18,7 @@ import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
+import jade.core.behaviours.SequentialBehaviour;
 import jade.core.behaviours.TickerBehaviour;
 import jade.core.behaviours.WakerBehaviour;
 import jade.domain.DFService;
@@ -138,9 +139,20 @@ public class PilotoAgent extends Agent {
                 if (emvoo) {
                     System.out.println(piloto.getNome() + ": Em voo com " + aviao.getPrefixo());
                     
-                    //propõe pouso depois de 1 minuto pilotando:
+                    
+                    
+                    //propõe pouso depois de 1 minuto pilotando
+                    SequentialBehaviour propoePousar = new SequentialBehaviour(myAgent) {
+                        @Override
+                        public int onEnd() {
+                            myAgent.doDelete();
+                            return 0;
+                        }
+                        
+                    };
+                    
                     long time = (long) (60000 + Math.random() * 60000);
-                    addBehaviour(new WakerBehaviour(myAgent, time) {
+                    propoePousar.addSubBehaviour(new WakerBehaviour(myAgent, time) {
                         
                         @Override
                         protected void onWake() {
@@ -153,6 +165,8 @@ public class PilotoAgent extends Agent {
                         }
                         
                     });
+                    
+                    addBehaviour(propoePousar);
                 
                 } else {
                     if (aeroporto_atual != null) {
@@ -163,6 +177,19 @@ public class PilotoAgent extends Agent {
 
         }
 
+    }
+    
+    private class PropoePousar extends SequentialBehaviour {
+
+        public PropoePousar(Agent a) {
+            super(a);
+        }
+
+        @Override
+        public int onEnd() {
+            return 0;
+        }       
+        
     }
 
     private class PropoePilotar extends Behaviour {
