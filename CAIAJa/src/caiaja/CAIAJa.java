@@ -104,7 +104,7 @@ public class CAIAJa {
         }
     }
 
-    public static List<AID> getServico(Agent agente ,String DescricaoServico) {
+    public static List<AID> getServico(Agent agente, String DescricaoServico) {
         DFAgentDescription template = new DFAgentDescription();
         ServiceDescription sd = new ServiceDescription();
         sd.setType(DescricaoServico);
@@ -120,6 +120,21 @@ public class CAIAJa {
             fe.printStackTrace();
         }
         return aeroportos;
+    }
+
+    public static void registrarServico(Agent agente, String Servico, String Nome) {
+        DFAgentDescription dfd = new DFAgentDescription();
+        dfd.setName(agente.getAID());
+        ServiceDescription sd = new ServiceDescription();
+        sd.setType(Servico);
+        sd.setName(Nome);
+        dfd.addServices(sd);
+
+        try {
+            DFService.register(agente, dfd);
+        } catch (FIPAException fe) {
+            fe.printStackTrace();
+        }
     }
 
 }
