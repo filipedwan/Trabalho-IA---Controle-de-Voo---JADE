@@ -60,7 +60,7 @@ public class CAIAJa {
             Aeroporto.start();
 
             for (String piloto : Pilotos) {
-                AgentController Piloto = ac.createNewAgent("p_" + piloto, "caiaja.agentes.PilotoAgente", new String[]{piloto});
+                AgentController Piloto = ac.createNewAgent("p_" + piloto, "caiaja.agentes.PilotoAgent", new String[]{piloto});
                 Piloto.start();
             }
             for (String Controlador : Controladores) {
