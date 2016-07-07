@@ -84,7 +84,8 @@ public class AeroportoAgent extends Agent {
             }
             System.out.println("Aeroporto " + aeroporto.getNome() + " operando");
 
-            String numero = JOptionPane.showInputDialog("Numero de Aeronaves em  " + aeroporto.getNome() + "?");
+//            String numero = JOptionPane.showInputDialog("Numero de Aeronaves em  " + aeroporto.getNome() + "?");
+            String numero = "3";
 
             try {
                 int naeronaves = Integer.parseInt(numero);
