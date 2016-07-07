@@ -7,10 +7,6 @@ package caiaja;
 // macelo testando gitHub clone commit
 // -----------------------------------
 
-import caiaja.model.Aeroporto;
-import caiaja.model.Pista;
-import jade.Boot;
-import static jade.Boot.DEFAULT_FILENAME;
 import jade.core.Profile;
 import jade.core.ProfileImpl;
 import jade.util.ExtendedProperties;
@@ -18,6 +14,8 @@ import jade.util.leap.Properties;
 import jade.wrapper.AgentContainer;
 import jade.wrapper.AgentController;
 import jade.wrapper.StaleProxyException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -45,6 +43,14 @@ public class CAIAJa {
             jade.core.Runtime.instance().createAgentContainer(p);
         }
 
+        List<String> Pilotos = new ArrayList<>();
+        List<String> Controladores = new ArrayList<>();
+
+        Pilotos.add("Fernando");
+        Pilotos.add("Filipe");
+        Pilotos.add("Marcelo");
+
+        Controladores.add("Jose");
         /**
          * Inicializando Agentes
          */
@@ -53,30 +59,14 @@ public class CAIAJa {
             AgentController Aeroporto = ac.createNewAgent("AeroportoSBBV", "caiaja.agentes.AeroportoAgent", new String[]{"", "SBBV", "Atlas Brasil Catanhede", "2700"});
             Aeroporto.start();
 
-            AgentController Controlador1 = ac.createNewAgent("Controlador1", "caiaja.agentes.ControladorAgent", new String[]{"cmd Amiltom"});
-            Controlador1.start();
-
-            //AgentController Controlador2 = ac.createNewAgent("Controlador2", "caiaja.agentes.ControladorAgent", new String[]{"cmd Fulano"});
-            //Controlador2.start();
-            
-            AgentController Piloto = ac.createNewAgent("Piloto", "caiaja.agentes.PilotoAgente", new String[]{"Fernando"});
-            Piloto.start();
-            
-            AgentController Piloto1 = ac.createNewAgent("Piloto1", "caiaja.agentes.PilotoAgente", new String[]{"Filipe"});
-            Piloto1.start();
-            
-//            
-            AgentController Piloto2 = ac.createNewAgent("Piloto2", "caiaja.agentes.PilotoAgente", new String[]{"Marcelo"});
-            Piloto2.start();
-            
-            AgentController Piloto3 = ac.createNewAgent("Piloto3", "caiaja.agentes.PilotoAgente", new String[]{"Jose"});
-            Piloto3.start();
-            
-            AgentController Piloto4 = ac.createNewAgent("Piloto4", "caiaja.agentes.PilotoAgente", new String[]{"Fulano"});
-            Piloto4.start();
-
-            AgentController Estacao = ac.createNewAgent("Estacao", "caiaja.agentes.EstacaoMeteorologicaAgent", new Object[0]);
-            Estacao.start();
+            for (String piloto : Pilotos) {
+                AgentController Piloto = ac.createNewAgent("p_" + piloto, "caiaja.agentes.PilotoAgente", new String[]{piloto});
+                Piloto.start();
+            }
+            for (String Controlador : Controladores) {
+                AgentController Controlador1 = ac.createNewAgent("c_" + Controlador, "caiaja.agentes.ControladorAgent", new String[]{Controlador});
+                Controlador1.start();
+            }
 
         } catch (StaleProxyException ex) {
             Logger.getLogger(CAIAJa.class.getName()).log(Level.SEVERE, null, ex);
