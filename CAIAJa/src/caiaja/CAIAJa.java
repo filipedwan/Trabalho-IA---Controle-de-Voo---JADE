@@ -7,8 +7,14 @@ package caiaja;
 // macelo testando gitHub clone commit
 // -----------------------------------
 
+import jade.core.AID;
+import jade.core.Agent;
 import jade.core.Profile;
 import jade.core.ProfileImpl;
+import jade.domain.DFService;
+import jade.domain.FIPAAgentManagement.DFAgentDescription;
+import jade.domain.FIPAAgentManagement.ServiceDescription;
+import jade.domain.FIPAException;
 import jade.util.ExtendedProperties;
 import jade.util.leap.Properties;
 import jade.wrapper.AgentContainer;
@@ -96,6 +102,24 @@ public class CAIAJa {
                 Logger.getLogger(CAIAJa.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+    }
+
+    public static List<AID> getServico(Agent agente ,String DescricaoServico) {
+        DFAgentDescription template = new DFAgentDescription();
+        ServiceDescription sd = new ServiceDescription();
+        sd.setType(DescricaoServico);
+        template.addServices(sd);
+
+        List<AID> aeroportos = new ArrayList<AID>();
+        try {
+            DFAgentDescription[] result = DFService.search(agente, template);
+            for (int i = 0; i < result.length; ++i) {
+                aeroportos.add(result[i].getName());
+            }
+        } catch (FIPAException fe) {
+            fe.printStackTrace();
+        }
+        return aeroportos;
     }
 
 }
