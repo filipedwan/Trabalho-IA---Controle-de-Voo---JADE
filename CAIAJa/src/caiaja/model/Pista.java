@@ -14,7 +14,7 @@ import java.io.Serializable;
  */
 public class Pista implements Serializable, Concept {
 
-    int tamanho;
+    private int tamanho;
 
     public Pista(int tamanho) {
         this.tamanho = tamanho;
