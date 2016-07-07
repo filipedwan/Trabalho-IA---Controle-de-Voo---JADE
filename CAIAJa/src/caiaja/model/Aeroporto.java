@@ -23,6 +23,7 @@ public class Aeroporto implements Serializable, Concept {
     List<Patio> Patio;
     EstacaoMeteorologica estacaoMeteorologica;
     Controlador controlador;
+    Bombeiro bombeiro;
     List<Aviao> avioes;
 
     public Aeroporto() {
@@ -48,7 +49,7 @@ public class Aeroporto implements Serializable, Concept {
     }
 
     public Aviao retiraAviao(int i) {
-        if (i < avioes.size()) {            
+        if (i < avioes.size()) {
             Aviao av = avioes.get(i);
             avioes.remove(av);
             return av;
@@ -106,6 +107,14 @@ public class Aeroporto implements Serializable, Concept {
 
     public void setControlador(Controlador controlador) {
         this.controlador = controlador;
+    }
+
+    public Bombeiro getBombeiro() {
+        return bombeiro;
+    }
+
+    public void setBombeiro(Bombeiro bombeiro) {
+        this.bombeiro = bombeiro;
     }
 
     @Override

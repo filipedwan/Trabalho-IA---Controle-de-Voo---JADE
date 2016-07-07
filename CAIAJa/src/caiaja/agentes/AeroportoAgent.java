@@ -7,6 +7,7 @@ package caiaja.agentes;
 
 import caiaja.model.Aeroporto;
 import caiaja.model.Aviao;
+import caiaja.model.Bombeiro;
 import caiaja.model.Controlador;
 import caiaja.model.Piloto;
 import caiaja.model.Pista;
@@ -358,27 +359,29 @@ public class AeroportoAgent extends Agent {
                 String title = msg.getContent();
                 ACLMessage reply = msg.createReply();
 
-                Aviao av = aeroporto.retiraAviao(0);
-                if (av != null) {
-                    try {
-                        Piloto pil = (Piloto) msg.getContentObject();
+//                Aviao av = aeroporto.retiraAviao(0);
+//                if (av != null) {
+                try {
+                    Bombeiro bombeiro = (Bombeiro) msg.getContentObject();
 
-                        reply.setPerformative(ACLMessage.INFORM);
-                        reply.setContentObject(av);
-                        System.out.println("Aeroporto " + aeroporto.getNome() + ": aviao para " + pil.getNome());
+                    aeroporto.setBombeiro(bombeiro);
+                    
+                    reply.setPerformative(ACLMessage.INFORM);
+                    reply.setContentObject(aeroporto);
+                    System.out.println("Aeroporto " + aeroporto.getNome() + ": aviao para " + bombeiro.getNome());
 
-                    } catch (UnreadableException ex) {
-                        System.out.println("Aeroporto " + aeroporto.getNome() + ": erro na msg");
-                        reply.setPerformative(ACLMessage.FAILURE);
-                        reply.setContent("error-msg");
-                    } catch (IOException ex) {
-                        Logger.getLogger(AeroportoAgent.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                } else {
-                    System.out.println("Aeroporto " + aeroporto.getNome() + ": pegaram o aviao neste tempo");
+                } catch (UnreadableException ex) {
+                    System.out.println("Aeroporto " + aeroporto.getNome() + ": erro na msg");
                     reply.setPerformative(ACLMessage.FAILURE);
-                    reply.setContent("not-available");
+                    reply.setContent("error-msg");
+                } catch (IOException ex) {
+                    Logger.getLogger(AeroportoAgent.class.getName()).log(Level.SEVERE, null, ex);
                 }
+//                } else {
+//                    System.out.println("Aeroporto " + aeroporto.getNome() + ": pegaram o aviao neste tempo");
+//                    reply.setPerformative(ACLMessage.FAILURE);
+//                    reply.setContent("not-available");
+//                }
                 myAgent.send(reply);
             } else {
                 block();
