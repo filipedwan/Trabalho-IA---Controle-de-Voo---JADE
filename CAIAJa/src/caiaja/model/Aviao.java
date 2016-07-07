@@ -25,12 +25,14 @@ public class Aviao implements Serializable, Concept {
     private String Prefixo;
     private int Propulsao; //Tipo de propulsao
     private int Motores; //Numero de motores da aeronave
+    private int tamanhoTanque; //em litros
 
     public Aviao(String Prefix) {
         Motores = 1;
         Propulsao = PROPULSAO_PISTAO;
         Prefixo = Prefix;
         pistaMinima = 500;
+        tamanhoTanque = 2600;
     }
 
     public int getPistaMinima() {
@@ -64,6 +66,14 @@ public class Aviao implements Serializable, Concept {
     public void setMotores(int Motores) {
         this.Motores = Motores;
     }
+    
+    public int getTamanhoTanque() {
+        return tamanhoTanque;
+    }
+
+    public void setTamanhoTanque(int tamanhoTanque) {
+        this.tamanhoTanque = tamanhoTanque;
+    }    
 
     @Override
     public int hashCode() {
@@ -86,5 +96,4 @@ public class Aviao implements Serializable, Concept {
         }
         return true;
     }
-
 }
