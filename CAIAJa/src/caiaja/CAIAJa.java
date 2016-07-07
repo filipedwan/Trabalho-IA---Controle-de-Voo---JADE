@@ -7,6 +7,10 @@ package caiaja;
 // macelo testando gitHub clone commit
 // -----------------------------------
 
+import caiaja.agentes.AeroportoAgent;
+import caiaja.agentes.BombeiroAgent;
+import caiaja.agentes.ControladorAgent;
+import caiaja.agentes.PilotoAgent;
 import jade.core.Profile;
 import jade.core.ProfileImpl;
 import jade.util.ExtendedProperties;
@@ -45,27 +49,42 @@ public class CAIAJa {
 
         List<String> Pilotos = new ArrayList<>();
         List<String> Controladores = new ArrayList<>();
+        List<String> Bombeiros = new ArrayList<>();
 
         Pilotos.add("Fernando");
         Pilotos.add("Filipe");
         Pilotos.add("Marcelo");
 
         Controladores.add("Jose");
+
+        Bombeiros.add("Carlos");
+
+        try {
+            Thread.sleep(20000);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(CAIAJa.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
         /**
          * Inicializando Agentes
          */
         try {
 
-            AgentController Aeroporto = ac.createNewAgent("AeroportoSBBV", "caiaja.agentes.AeroportoAgent", new String[]{"", "SBBV", "Atlas Brasil Catanhede", "2700"});
+            AgentController Aeroporto = ac.createNewAgent("AeroportoSBBV", AeroportoAgent.class + "", new String[]{"", "SBBV", "Atlas Brasil Catanhede", "2700"});
             Aeroporto.start();
 
             for (String piloto : Pilotos) {
-                AgentController Piloto = ac.createNewAgent("p_" + piloto, "caiaja.agentes.PilotoAgent", new String[]{piloto});
+                AgentController Piloto = ac.createNewAgent("p_" + piloto, PilotoAgent.class + "", new String[]{piloto});
                 Piloto.start();
             }
             for (String Controlador : Controladores) {
-                AgentController Controlador1 = ac.createNewAgent("c_" + Controlador, "caiaja.agentes.ControladorAgent", new String[]{Controlador});
+                AgentController Controlador1 = ac.createNewAgent("c_" + Controlador, ControladorAgent.class + "", new String[]{Controlador});
                 Controlador1.start();
+            }
+
+            for (String bombeiro : Bombeiros) {
+                AgentController Bombeiros1 = ac.createNewAgent("b_" + bombeiro, BombeiroAgent.class + "", new String[]{bombeiro});
+                Bombeiros1.start();
             }
 
         } catch (StaleProxyException ex) {
