@@ -109,6 +109,28 @@ public class ControladorAgent extends Agent {
 
                 addBehaviour(b);
                 addBehaviour(c);
+                
+                //Verificando propostas de pouso dos pilotos
+                addBehaviour(new TickerBehaviour(this, 60000) {
+                    @Override
+                    protected void onTick() {
+                        MessageTemplate mt1 = MessageTemplate.MatchPerformative(ACLMessage.PROPOSE);
+                        MessageTemplate mt2 = MessageTemplate.MatchConversationId("proposta-pouso");
+                        MessageTemplate mt = MessageTemplate.and(mt1, mt2);
+                        
+                        ACLMessage msg = myAgent.receive(mt);
+                        
+                        if (msg != null) {
+                            System.out.println("Controlador: " +getName()+ "informa que a pista está pronta para pouso "
+                                    + "Piloto "+msg.getSender().getLocalName()+" pode pousar");
+                            ACLMessage reply = msg.createReply();
+                            reply.setContent("Pode pousar");
+                            reply.setPerformative(ACLMessage.INFORM);
+                            reply.setConversationId("pouso-autorizado");
+                            myAgent.send(reply);
+                        }
+                    }
+                });
             }
         }
     }

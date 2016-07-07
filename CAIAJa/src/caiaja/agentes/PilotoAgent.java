@@ -19,6 +19,7 @@ import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.TickerBehaviour;
+import jade.core.behaviours.WakerBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
@@ -32,6 +33,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -135,6 +137,23 @@ public class PilotoAgent extends Agent {
 
                 if (emvoo) {
                     System.out.println(piloto.getNome() + ": Em voo com " + aviao.getPrefixo());
+                    
+                    //propõe pouso depois de 1 minuto pilotando:
+                    long time = (long) (60000 + Math.random() * 60000);
+                    addBehaviour(new WakerBehaviour(myAgent, time) {
+                        
+                        @Override
+                        protected void onWake() {
+                            ACLMessage msg = new ACLMessage(ACLMessage.PROPOSE);
+                            msg.setContent("Pousar");
+                            msg.addReceiver(Controlador);
+                            msg.setConversationId("proposta-pouso");
+                            System.out.println("Piloto "+piloto.getNome()+ " Enviando proposta de pouso");
+                            send(msg);
+                        }
+                        
+                    });
+                
                 } else {
                     if (aeroporto_atual != null) {
                         myAgent.addBehaviour(new PilotoAgent.PropoeDecolar(Controladores));
