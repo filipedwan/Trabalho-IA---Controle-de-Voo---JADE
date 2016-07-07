@@ -4,8 +4,15 @@
  * and open the template in the editor.
  */
 package caiaja.agentes;
-import jade.core.Agent;
 import caiaja.model.Abastecedor;
+import caiaja.model.Aviao;
+
+import jade.core.Agent;
+import jade.core.behaviours.Behaviour;
+import jade.domain.DFService;
+import jade.domain.FIPAAgentManagement.DFAgentDescription;
+import jade.domain.FIPAAgentManagement.ServiceDescription;
+import jade.domain.FIPAException;
 
 /**
  *
@@ -21,9 +28,36 @@ public class AbastecedorAgent extends Agent{
         
         Object[] args = getArguments();
         
+        abastecedor = new Abastecedor();
         
-        
+        if (args != null) {
+            if (args.length > 0) {
+                abastecedor.setNome((String) args[0]);
+
+                System.out.println("Abstecedor " + abastecedor.getNome() + " procurando avião sem combustível");                
+
+                DFAgentDescription dfd = new DFAgentDescription();
+                dfd.setName(getAID());
+                ServiceDescription sd = new ServiceDescription();
+                sd.setType("Abastecedor");
+                sd.setName(abastecedor.getNome());
+                dfd.addServices(sd);
+
+                try {
+                    DFService.register(this, dfd);
+                } catch (FIPAException fe) {
+                    fe.printStackTrace();
+                }
+
+                //addBehaviour(new BombeiroAgent.BuscarEmprego(this, 60000));
+
+                //addBehaviour(new BombeiroAgent.RequisicoesDePropostas());
+            }
+        }        
         
     }
     
+    private class Abastecer extends Behaviour{
+        Aviao aviao = new Aviao();
+    }
 }
