@@ -15,24 +15,32 @@ public class AbastecedorAgent extends Agent{
     private boolean Ocupado;
     
     @Override
-    protected void setup(){
-        
-        Object[] args = getArguments();
-        
-        addBehaviour(new CyclicBehaviour(this) {
-            @Override
-            public void action(){
-                ACLMessage msg = myAgent.receive();
-                if(msg != null){
-                    String content = msg.getContent();
-                    if(content.equalsIgnoreCase("Abasteca")){
-                        //Receber msg o controlador
-                        //sobre qual aviao necessita abastecer
-                    }
-                } else {
-                    block();
-                }
+    protected void setup(){        
+        Object[] args = getArguments();        
+        if (args != null) {
+            if (args.length > 0) {
+                //executar classe privada aguardaPedidoDeAbastecimento
+                AguardaPedidoDeAbastecimento aguarda;
+                aguarda = new AguardaPedidoDeAbastecimento();
             }
-        });
+        }
+    }
+    
+    private class AguardaPedidoDeAbastecimento extends CyclicBehaviour{
+        
+        @Override
+        public void action() {
+            
+            ACLMessage msg = myAgent.receive();
+            if(msg != null){
+                String content = msg.getContent();
+                if(content.equalsIgnoreCase("Abasteca")){
+                    //Receber msg o controlador
+                    //sobre qual aviao necessita abastecer
+                }
+            } else {
+                block();
+            }            
+        }        
     }
 }
