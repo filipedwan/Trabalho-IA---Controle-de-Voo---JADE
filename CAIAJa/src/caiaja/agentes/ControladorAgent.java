@@ -164,7 +164,7 @@ public class ControladorAgent extends Agent {
                     reply.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
                     reply.setConversationId("pouso-autorizado");
                     myAgent.send(reply);
-                    stop();
+                    //stop();
                 } else {
                     block();
                 }

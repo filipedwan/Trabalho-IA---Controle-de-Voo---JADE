@@ -90,7 +90,7 @@ public class CAIAJa {
         }
 
         try {
-            Thread.sleep(20000);
+            Thread.sleep(1000);
         } catch (InterruptedException ex) {
             Logger.getLogger(CAIAJa.class.getName()).log(Level.SEVERE, null, ex);
         }

@@ -157,7 +157,8 @@ public class PilotoAgent extends Agent {
             SequentialBehaviour propoePousar = new SequentialBehaviour(myAgent) {
                 @Override
                 public int onEnd() {
-                    //myAgent.doDelete();
+                    emvoo = false;
+                    myAgent.doDelete();
 
                     return 0;
                 }
@@ -175,12 +176,12 @@ public class PilotoAgent extends Agent {
                     msg.setConversationId("proposta-pouso");
                     System.out.println("Piloto " + piloto.getNome() + " Enviando proposta de pouso");
                     send(msg);
-
+                    stop();
                 }
 
             });
 
-            propoePousar.addSubBehaviour(new TickerBehaviour(myAgent, 20) {
+            propoePousar.addSubBehaviour(new TickerBehaviour(myAgent, 200) {
                 @Override
                 protected void onTick() {
                     //System.err.println("\nCHEGOU AQUI\n");
@@ -193,7 +194,7 @@ public class PilotoAgent extends Agent {
                     if (msg != null) {
                         if (msg.getConversationId().equalsIgnoreCase("pouso-autorizado")) {
                             System.out.println("Piloto " + piloto.getNome() + " preparando para pouso.");
-                            stop();
+                            stop();                            
                         }
                     } else {
                         block();
@@ -209,6 +210,7 @@ public class PilotoAgent extends Agent {
                     msg.setConversationId("pouso-sucesso");
                     System.out.println("Piloto " + piloto.getNome() + " informa que o pouso da aeronave " + aviao.getPrefixo() + " foi realizado com sucesso");
                     myAgent.send(msg);
+                    emvoo = false;
                 }
             });
 
