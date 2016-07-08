@@ -28,6 +28,7 @@ import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
+import jade.core.behaviours.SequentialBehaviour;
 import jade.core.behaviours.TickerBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -111,26 +112,8 @@ public class ControladorAgent extends Agent {
                 addBehaviour(c);
                 
                 //Verificando propostas de pouso dos pilotos
-                addBehaviour(new TickerBehaviour(this, 60000) {
-                    @Override
-                    protected void onTick() {
-                        MessageTemplate mt1 = MessageTemplate.MatchPerformative(ACLMessage.PROPOSE);
-                        MessageTemplate mt2 = MessageTemplate.MatchConversationId("proposta-pouso");
-                        MessageTemplate mt = MessageTemplate.and(mt1, mt2);
-                        
-                        ACLMessage msg = myAgent.receive(mt);
-                        
-                        if (msg != null) {
-                            System.out.println("Controlador: " +getName()+ "informa que a pista está pronta para pouso "
-                                    + "Piloto "+msg.getSender().getLocalName()+" pode pousar");
-                            ACLMessage reply = msg.createReply();
-                            reply.setContent("Pode pousar");
-                            reply.setPerformative(ACLMessage.INFORM);
-                            reply.setConversationId("pouso-autorizado");
-                            myAgent.send(reply);
-                        }
-                    }
-                });
+                tratarPropostasDePouso();
+                
             }
         }
     }
@@ -151,6 +134,46 @@ public class ControladorAgent extends Agent {
             return true;
         }
         return false;
+    }
+
+    private void tratarPropostasDePouso() {
+        
+        SequentialBehaviour tratarPropostasPouso = new SequentialBehaviour(this) {
+            
+            @Override
+            public int onEnd() {
+                return 0;
+            }
+            
+        };
+        
+        tratarPropostasPouso.addSubBehaviour(new TickerBehaviour(this, 2000) {
+                    @Override
+                    protected void onTick() {
+                        MessageTemplate mt1 = MessageTemplate.MatchPerformative(ACLMessage.PROPOSE);
+                        MessageTemplate mt2 = MessageTemplate.MatchConversationId("proposta-pouso");
+                        MessageTemplate mt = MessageTemplate.and(mt1, mt2);
+                        
+                        ACLMessage msg = myAgent.receive(mt);
+                        
+                        if (msg != null) {
+                            System.out.println("Controlador: " +getName()+ "informa que a pista está pronta para pouso "
+                                    + "Piloto "+msg.getSender().getLocalName()+" pode pousar");
+                            ACLMessage reply = msg.createReply();
+                            reply.setContent("Pode pousar");
+                            reply.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
+                            reply.setConversationId("pouso-autorizado");
+                            myAgent.send(reply);
+                            stop();
+                        } else {
+                            block();
+                        }
+                    }
+                });
+        
+        // TODO: Fazer uma proposta para o abastercer o avião que pousou
+        
+        addBehaviour(tratarPropostasPouso);
     }
 
     class TratarControladorConsultasBehaviour extends SimpleAchieveREResponder {

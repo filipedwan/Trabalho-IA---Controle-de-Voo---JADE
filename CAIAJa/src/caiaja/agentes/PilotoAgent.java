@@ -86,6 +86,7 @@ public class PilotoAgent extends Agent {
                 addBehaviour(new PilotoAgent.BuscarAtividade(this, 5000));
 
                 addBehaviour(new PilotoAgent.RequisicoesDePropostas());
+
             }
         }
     }
@@ -138,58 +139,86 @@ public class PilotoAgent extends Agent {
 
                 if (emvoo) {
                     System.out.println(piloto.getNome() + ": Em voo com " + aviao.getPrefixo());
-                    
-                    
-                    
+
                     //propõe pouso depois de 1 minuto pilotando
-                    SequentialBehaviour propoePousar = new SequentialBehaviour(myAgent) {
-                        @Override
-                        public int onEnd() {
-                            myAgent.doDelete();
-                            return 0;
-                        }
-                        
-                    };
-                    
-                    long time = (long) (60000 + Math.random() * 60000);
-                    propoePousar.addSubBehaviour(new WakerBehaviour(myAgent, time) {
-                        
-                        @Override
-                        protected void onWake() {
-                            ACLMessage msg = new ACLMessage(ACLMessage.PROPOSE);
-                            msg.setContent("Pousar");
-                            msg.addReceiver(Controlador);
-                            msg.setConversationId("proposta-pouso");
-                            System.out.println("Piloto "+piloto.getNome()+ " Enviando proposta de pouso");
-                            send(msg);
-                        }
-                        
-                    });
-                    
-                    addBehaviour(propoePousar);
-                
-                } else {
-                    if (aeroporto_atual != null) {
-                        myAgent.addBehaviour(new PilotoAgent.PropoeDecolar(Controladores));
-                    }
+                    propoePousar();
+
+                } else if (aeroporto_atual != null) {
+                    myAgent.addBehaviour(new PilotoAgent.PropoeDecolar(Controladores));
                 }
             }
 
         }
 
-    }
-    
-    private class PropoePousar extends SequentialBehaviour {
+        /*
+        Método que com InnerClasses que fazem o Caso de Uso de pouso do piloto:
+         */
+        public void propoePousar() {
+            SequentialBehaviour propoePousar = new SequentialBehaviour(myAgent) {
+                @Override
+                public int onEnd() {
+                    //myAgent.doDelete();
 
-        public PropoePousar(Agent a) {
-            super(a);
+                    return 0;
+                }
+
+            };
+
+            long time = (long) (60000 + Math.random() * 60000);
+            //propoePousar.addSubBehaviour(new WakerBehaviour(myAgent, time) {
+            propoePousar.addSubBehaviour(new WakerBehaviour(myAgent, 20) {
+                @Override
+                protected void onWake() {
+                    ACLMessage msg = new ACLMessage(ACLMessage.PROPOSE);
+                    msg.setContent("Pousar");
+                    msg.addReceiver(Controlador);
+                    msg.setConversationId("proposta-pouso");
+                    System.out.println("Piloto " + piloto.getNome() + " Enviando proposta de pouso");
+                    send(msg);
+
+                }
+
+            });
+
+            propoePousar.addSubBehaviour(new TickerBehaviour(myAgent, 20) {
+                @Override
+                protected void onTick() {
+                    //System.err.println("\nCHEGOU AQUI\n");
+                    MessageTemplate mt1 = MessageTemplate.MatchPerformative(ACLMessage.ACCEPT_PROPOSAL);
+                    MessageTemplate mt2 = MessageTemplate.MatchConversationId("pouso-autorizado");
+                    MessageTemplate mt = MessageTemplate.and(mt1, mt2);
+
+                    ACLMessage msg = myAgent.receive(mt);
+
+                    if (msg != null) {
+                        if (msg.getConversationId().equalsIgnoreCase("pouso-autorizado")) {
+                            System.out.println("Piloto " + piloto.getNome() + " preparando para pouso.");
+                            stop();
+                        }
+                    } else {
+                        block();
+                    }
+                }
+            });
+
+            propoePousar.addSubBehaviour(new OneShotBehaviour(myAgent) {
+                @Override
+                public void action() {
+                    //aviao x pousado com sucesso
+                    ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+                    msg.setConversationId("pouso-sucesso");
+                    System.out.println("Piloto " + piloto.getNome() + " informa que o pouso da aeronave " + aviao.getPrefixo() + " foi realizado com sucesso");
+                    myAgent.send(msg);
+                }
+            });
+
+            // TODO: reiniciar atributos do Piloto
+            // TODO: colocar avião no Aeroporto e remover avião do Piloto
+            propoePousar.addSubBehaviour(this);
+
+            addBehaviour(propoePousar);
         }
 
-        @Override
-        public int onEnd() {
-            return 0;
-        }       
-        
     }
 
     private class PropoePilotar extends Behaviour {
@@ -327,7 +356,7 @@ public class PilotoAgent extends Agent {
             dec.setAeroporto(((PilotoAgent) myAgent).aeroporto_atual);
 
             Ontology o = myAgent.getContentManager().lookupOntology(CAIAJaOntologia.NAME);
-                // Create an ACL message to query the engager agent if the above fact is true or false
+            // Create an ACL message to query the engager agent if the above fact is true or false
 //                ACLMessage queryMsg = new ACLMessage(ACLMessage.QUERY_IF);
 //                queryMsg.addReceiver(((PilotoAgent) myAgent).Controlador);
 //                queryMsg.setLanguage(FIPANames.ContentLanguage.FIPA_SL0);
@@ -339,7 +368,7 @@ public class PilotoAgent extends Agent {
 //                } catch (Exception e) {
 //                    e.printStackTrace();
 //                }
-                // Create and add a behaviour to query the engager agent whether
+            // Create and add a behaviour to query the engager agent whether
             // person p already works for company c following a FIPAQeury protocol
 //                queryBehaviour = new CheckAlreadyWorkingBehaviour(myAgent, queryMsg);
 //                addSubBehaviour(queryBehaviour);
