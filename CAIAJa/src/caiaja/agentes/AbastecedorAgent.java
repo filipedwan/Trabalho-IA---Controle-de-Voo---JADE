@@ -40,7 +40,7 @@ public class AbastecedorAgent extends Agent{
                 }
             } else {
                 block();
-            }            
-        }        
+            }
+        }
     }
 }
