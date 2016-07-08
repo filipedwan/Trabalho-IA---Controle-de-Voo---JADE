@@ -6,6 +6,7 @@
 package caiaja.agentes;
 import caiaja.model.Abastecedor;
 import caiaja.model.Aviao;
+import caiaja.model.Controlador;
 
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
@@ -20,7 +21,9 @@ import jade.domain.FIPAException;
  */
 public class AbastecedorAgent extends Agent{
 
-    Abastecedor abastecedor;
+    private Abastecedor abastecedor;
+    private Controlador controlador;
+    private boolean ocupado;
     
     @Override
     protected void setup() {
@@ -58,6 +61,19 @@ public class AbastecedorAgent extends Agent{
     }
     
     private class Abastecer extends Behaviour{
-        Aviao aviao = new Aviao();
+        
+        private Aviao aviao;
+        private int TamanhoMangueira;        
+
+        @Override
+        public void action() {
+            
+        }
+
+        @Override
+        public boolean done() {
+            return false;
+        }
+
     }
 }

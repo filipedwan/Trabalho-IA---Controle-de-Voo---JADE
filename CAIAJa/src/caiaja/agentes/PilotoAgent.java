@@ -138,7 +138,7 @@ public class PilotoAgent extends Agent {
 
                 if (emvoo) {
                     System.out.println(piloto.getNome() + ": Em voo com " + aviao.getPrefixo());
-                    
+
                     
                     
                     //propõe pouso depois de 1 minuto pilotando
@@ -148,12 +148,12 @@ public class PilotoAgent extends Agent {
                             myAgent.doDelete();
                             return 0;
                         }
-                        
+
                     };
-                    
+
                     long time = (long) (60000 + Math.random() * 60000);
                     propoePousar.addSubBehaviour(new WakerBehaviour(myAgent, time) {
-                        
+
                         @Override
                         protected void onWake() {
                             ACLMessage msg = new ACLMessage(ACLMessage.PROPOSE);
@@ -163,22 +163,22 @@ public class PilotoAgent extends Agent {
                             System.out.println("Piloto "+piloto.getNome()+ " Enviando proposta de pouso");
                             send(msg);
                         }
-                        
+
                     });
-                    
+
                     addBehaviour(propoePousar);
-                
+
                 } else {
                     if (aeroporto_atual != null) {
-                        myAgent.addBehaviour(new PilotoAgent.PropoeDecolar(Controladores));
-                    }
+                    myAgent.addBehaviour(new PilotoAgent.PropoeDecolar(Controladores));
                 }
+            }
             }
 
         }
 
     }
-    
+
     private class PropoePousar extends SequentialBehaviour {
 
         public PropoePousar(Agent a) {
@@ -188,8 +188,8 @@ public class PilotoAgent extends Agent {
         @Override
         public int onEnd() {
             return 0;
-        }       
-        
+        }
+
     }
 
     private class PropoePilotar extends Behaviour {
@@ -274,7 +274,7 @@ public class PilotoAgent extends Agent {
                             aeroporto = reply.getSender();
                             try {
                                 aviao = ((Aviao) reply.getContentObject());
-                                System.out.println(piloto.getNome() + ": Pilotando " + aviao.getPrefixo());
+                                System.out.println(piloto.getNome() + ": Pilotando " + aviao.getPrefixo());                                
                             } catch (UnreadableException ex) {
                                 Logger.getLogger(PilotoAgent.class.getName()).log(Level.SEVERE, null, ex);
                             }
@@ -327,7 +327,7 @@ public class PilotoAgent extends Agent {
             dec.setAeroporto(((PilotoAgent) myAgent).aeroporto_atual);
 
             Ontology o = myAgent.getContentManager().lookupOntology(CAIAJaOntologia.NAME);
-                // Create an ACL message to query the engager agent if the above fact is true or false
+            // Create an ACL message to query the engager agent if the above fact is true or false
 //                ACLMessage queryMsg = new ACLMessage(ACLMessage.QUERY_IF);
 //                queryMsg.addReceiver(((PilotoAgent) myAgent).Controlador);
 //                queryMsg.setLanguage(FIPANames.ContentLanguage.FIPA_SL0);
@@ -339,7 +339,7 @@ public class PilotoAgent extends Agent {
 //                } catch (Exception e) {
 //                    e.printStackTrace();
 //                }
-                // Create and add a behaviour to query the engager agent whether
+            // Create and add a behaviour to query the engager agent whether
             // person p already works for company c following a FIPAQeury protocol
 //                queryBehaviour = new CheckAlreadyWorkingBehaviour(myAgent, queryMsg);
 //                addSubBehaviour(queryBehaviour);
