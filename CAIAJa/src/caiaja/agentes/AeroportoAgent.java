@@ -359,8 +359,6 @@ public class AeroportoAgent extends Agent {
                 String title = msg.getContent();
                 ACLMessage reply = msg.createReply();
 
-//                Aviao av = aeroporto.retiraAviao(0);
-//                if (av != null) {
                 try {
                     Bombeiro bombeiro = (Bombeiro) msg.getContentObject();
 
@@ -377,11 +375,6 @@ public class AeroportoAgent extends Agent {
                 } catch (IOException ex) {
                     Logger.getLogger(AeroportoAgent.class.getName()).log(Level.SEVERE, null, ex);
                 }
-//                } else {
-//                    System.out.println("Aeroporto " + aeroporto.getNome() + ": pegaram o aviao neste tempo");
-//                    reply.setPerformative(ACLMessage.FAILURE);
-//                    reply.setContent("not-available");
-//                }
                 myAgent.send(reply);
             } else {
                 block();
