@@ -51,6 +51,8 @@ import java.util.logging.Logger;
  * @author fosa
  */
 public class ControladorAgent extends Agent {
+    
+    
 
     Controlador controlador;
     Aeroporto aeroporto_m;
