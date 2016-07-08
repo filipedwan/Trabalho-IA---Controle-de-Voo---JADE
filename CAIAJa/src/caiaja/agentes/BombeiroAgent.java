@@ -81,26 +81,26 @@ public class BombeiroAgent extends Agent {
 
     private class PropoeTrabalhar extends Behaviour {
 
-        List<AID> aerosportos;
+        List<AID> aeroportos;
         AID Escolhido;
         int estado = 0;
         private MessageTemplate mt; // The template to receive replies
         private int repliesCnt = 0;
 
-        public PropoeTrabalhar(List<AID> aerosportos) {
-            this.aerosportos = aerosportos;
+        public PropoeTrabalhar(List<AID> aeroportos) {
+            this.aeroportos = aeroportos;
         }
 
         @Override
         public void action() {
-            System.out.println("Bombeiro " + bombeiro.getNome() + ": Trablho bombeiro " + estado);
+            System.out.println("Bombeiro " + bombeiro.getNome() + ": Trabalho bombeiro " + estado);
             switch (estado) {
                 case 0: {
                     ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
 
-                    for (AID aerosporto : aerosportos) {
-                        System.out.println("Bombeiro " + bombeiro.getNome() + " --> " + aerosporto.getName());
-                        cfp.addReceiver(aerosporto);
+                    for (AID aeroporto : aeroportos) {
+                        System.out.println("Bombeiro " + bombeiro.getNome() + " --> " + aeroporto.getName());
+                        cfp.addReceiver(aeroporto);
                     }
                     cfp.setConversationId("proposta-bombeiro");
                     cfp.setReplyWith("cfp" + System.currentTimeMillis());
@@ -127,7 +127,7 @@ public class BombeiroAgent extends Agent {
                         }
 
                         repliesCnt++;
-                        if (repliesCnt >= aerosportos.size()) {
+                        if (repliesCnt >= aeroportos.size()) {
                             estado = 2;
                         }
                     } else {
