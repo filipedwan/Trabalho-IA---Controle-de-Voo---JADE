@@ -37,7 +37,7 @@ public class Aviao implements Serializable, Concept {
         Propulsao = PROPULSAO_PISTAO;
         Prefixo = Prefix;
         pistaMinima = 500;
-        tamanhoTanque = 200;
+        tamanhoTanque = 100;
         aceleracaoMotor = 0;
         combustivel = tamanhoTanque;
     }
@@ -101,6 +101,10 @@ public class Aviao implements Serializable, Concept {
         this.aceleracaoMotor = aceleracaoMotor;
     }
 
+    public float getNilveCombustivel() {
+        return (float) combustivel * 100 / tamanhoTanque;
+    }
+
     public int getCombustivel() {
         return combustivel;
     }
@@ -145,7 +149,7 @@ public class Aviao implements Serializable, Concept {
                     setCombustivel(combustivel - getMotores());
                     milis -= (500 * getAceleracaoMotor());
                 }
-                if (getCombustivel() < (getTamanhoTanque() * 0.1) && getCombustivel() > (getTamanhoTanque() * 0.1)) {
+                if (getCombustivel() <= (getTamanhoTanque() * 0.1) && getCombustivel() >= (getTamanhoTanque() * 0.09)) {
                     System.err.println(getPrefixo() + ": 10% combutivel");
                 }
 //                System.err.println(getPrefixo() + ": acel=" + getAceleracaoMotor() + " comb=" + getCombustivel() + " milis=" + milis);

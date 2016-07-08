@@ -97,6 +97,7 @@ public class ControladorAgent extends Agent {
                 addBehaviour(new RecebePropostaDecolar());
                 addBehaviour(new VerificaOntologia(this, 5000));
                 addBehaviour(new Contato());
+                addBehaviour(new RecebePilotoConsultaControlador());
 
                 // Create and add the behaviour for handling QUERIES using the employment-ontology
                 addBehaviour(new TratarControladorConsultasBehaviour(this));
@@ -637,6 +638,46 @@ public class ControladorAgent extends Agent {
                 reply.setPerformative(ACLMessage.INFORM);
 
                 System.out.println(controlador.getNome() + ": Pode decolar");
+                myAgent.send(reply);
+            } else {
+                block();
+            }
+        }
+    }
+
+    /**
+     * Classe para responder aos requerimentos de pilotos que precisem de um
+     * saber quem é o controlador
+     */
+    private class RecebePilotoConsultaControlador extends CyclicBehaviour {
+
+        public void action() {
+            MessageTemplate mt = MessageTemplate.and(
+                    MessageTemplate.MatchPerformative(ACLMessage.QUERY_IF),
+                    MessageTemplate.MatchConversationId("piloto-consulta-Controlador")
+            );
+            ACLMessage msg = myAgent.receive(mt);
+            if (msg != null) {
+
+                ACLMessage reply = msg.createReply();
+                // CFP Message received. Process it
+//                String perfixo = msg.getContent();
+                Aeroporto aeroporto_consulta;
+                try {
+                    aeroporto_consulta = (Aeroporto) msg.getContentObject();
+
+                    if (aeroporto_m.equals(aeroporto_consulta)) {
+                        System.out.println(controlador.getNome() + ": Sou seu Controlador");
+                        reply.setPerformative(ACLMessage.CONFIRM);
+                    } else {
+                        reply.setPerformative(ACLMessage.DISCONFIRM);
+
+                    }
+
+                } catch (UnreadableException ex) {
+                    reply.setPerformative(ACLMessage.FAILURE);
+                }
+
                 myAgent.send(reply);
             } else {
                 block();
