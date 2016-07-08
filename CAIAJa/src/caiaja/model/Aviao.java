@@ -8,6 +8,8 @@ package caiaja.model;
 import jade.content.Concept;
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -26,13 +28,18 @@ public class Aviao implements Serializable, Concept {
     private int Propulsao; //Tipo de propulsao
     private int Motores; //Numero de motores da aeronave
     private int tamanhoTanque; //em litros
+    private float aceleracaoMotor; //em litros
+    int combustivel;
+    private Thread th;
 
     public Aviao(String Prefix) {
         Motores = 1;
         Propulsao = PROPULSAO_PISTAO;
         Prefixo = Prefix;
         pistaMinima = 500;
-        tamanhoTanque = 2600;
+        tamanhoTanque = 200;
+        aceleracaoMotor = 0;
+        combustivel = tamanhoTanque;
     }
 
     public int getPistaMinima() {
@@ -66,14 +73,41 @@ public class Aviao implements Serializable, Concept {
     public void setMotores(int Motores) {
         this.Motores = Motores;
     }
-    
+
     public int getTamanhoTanque() {
         return tamanhoTanque;
     }
 
     public void setTamanhoTanque(int tamanhoTanque) {
         this.tamanhoTanque = tamanhoTanque;
-    }    
+    }
+
+    public float getAceleracaoMotor() {
+        return aceleracaoMotor;
+    }
+
+    public void setAceleracaoMotor(float aceleracaoMotor) {
+        if (aceleracaoMotor > 0) {
+            if (th != null) {
+                if (th.isAlive()) {
+                    th.stop();
+                }
+            }
+            th = new Thread(new GastaCommbustivel());
+
+            th.start();
+
+        }
+        this.aceleracaoMotor = aceleracaoMotor;
+    }
+
+    public int getCombustivel() {
+        return combustivel;
+    }
+
+    public void setCombustivel(int combustivel) {
+        this.combustivel = combustivel;
+    }
 
     @Override
     public int hashCode() {
@@ -95,5 +129,35 @@ public class Aviao implements Serializable, Concept {
             return false;
         }
         return true;
+    }
+
+    class GastaCommbustivel implements Runnable {
+
+        public GastaCommbustivel() {
+        }
+
+        @Override
+        public void run() {
+            while (getCombustivel() > 0) {
+                int milis = 1000;
+
+                if (getAceleracaoMotor() > 0) {
+                    setCombustivel(combustivel - getMotores());
+                    milis -= (500 * getAceleracaoMotor());
+                }
+                if (getCombustivel() < (getTamanhoTanque() * 0.1) && getCombustivel() > (getTamanhoTanque() * 0.1)) {
+                    System.err.println(getPrefixo() + ": 10% combutivel");
+                }
+//                System.err.println(getPrefixo() + ": acel=" + getAceleracaoMotor() + " comb=" + getCombustivel() + " milis=" + milis);
+                try {
+                    Thread.sleep(milis);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(Aviao.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            System.err.println(getPrefixo() + ": Sem combutivel");
+
+        }
+
     }
 }

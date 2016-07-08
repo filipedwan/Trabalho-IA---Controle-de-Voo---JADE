@@ -199,15 +199,16 @@ public class CaiaJaJanela extends javax.swing.JFrame {
         String nome = PIlotoNomejTextField.getText();
 
         AgentController Piloto1 = null;
+
         try {
-            Piloto1 = ac.createNewAgent(nome, "caiaja.agentes.PilotoAgente", new String[]{nome});
+            Piloto1 = ac.createNewAgent(nome, "caiaja.agentes.PilotoAgent", new String[]{nome});
 
             Piloto1.start();
         } catch (StaleProxyException ex) {
             Logger.getLogger(CaiaJaJanela.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        PilotosjTabbedPane.add(new PilotoJPanel((PilotoAgent) Piloto1));
+        PilotosjTabbedPane.add(nome, new PilotoJPanel((PilotoAgent) new PilotoAgent()));
     }//GEN-LAST:event_PilotoNovojButtonActionPerformed
 
     /**
