@@ -7,6 +7,7 @@ package caiaja;
 // macelo testando gitHub clone commit
 // -----------------------------------
 
+import caiaja.janelas.CaiaJaJanela;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.Profile;
@@ -89,11 +90,15 @@ public class CAIAJa {
             Logger.getLogger(CAIAJa.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        try {
-            Thread.sleep(20000);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(CAIAJa.class.getName()).log(Level.SEVERE, null, ex);
-        }
+//        try {
+//            Thread.sleep(20000);
+//        } catch (InterruptedException ex) {
+//            Logger.getLogger(CAIAJa.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+
+
+//            CaiaJaJanela j = new CaiaJaJanela(ac);
+//            j.setVisible(true);
 
         for (AgentController Agente : Agentes) {
             try {
