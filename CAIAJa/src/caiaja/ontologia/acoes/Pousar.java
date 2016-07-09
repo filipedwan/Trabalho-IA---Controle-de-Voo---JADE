@@ -5,6 +5,7 @@
  */
 package caiaja.ontologia.acoes;
 
+import caiaja.model.Aeroporto;
 import caiaja.model.Aviao;
 import caiaja.model.Piloto;
 import jade.content.Concept;
@@ -18,7 +19,17 @@ public class Pousar implements Concept {
 
     private Aviao _aviao;
     private Piloto _piloto;
+    private Aeroporto _aeroporto;
     private AID _actor;
+    private String _replyWith;
+
+    public Pousar(Aviao _aviao, Piloto _piloto, Aeroporto _aeroporto, AID _actor, String _replyWith) {
+        this._aviao = _aviao;
+        this._piloto = _piloto;
+        this._aeroporto = _aeroporto;
+        this._actor = _actor;
+        this._replyWith = _replyWith;
+    }
 
     public void setPiloto(Piloto piloto) {
         _piloto = piloto;
@@ -34,6 +45,30 @@ public class Pousar implements Concept {
 
     public Aviao getAviao() {
         return _aviao;
+    }
+
+    public Aeroporto getAeroporto() {
+        return _aeroporto;
+    }
+
+    public void setAeroporto(Aeroporto _aeroporto) {
+        this._aeroporto = _aeroporto;
+    }
+
+    public AID getActor() {
+        return _actor;
+    }
+
+    public void setActor(AID _actor) {
+        this._actor = _actor;
+    }
+
+    public String getReplyWith() {
+        return _replyWith;
+    }
+
+    public void setReplyWith(String _replyWith) {
+        this._replyWith = _replyWith;
     }
 
 }

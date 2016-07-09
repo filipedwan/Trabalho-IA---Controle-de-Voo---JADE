@@ -86,28 +86,39 @@ public class Aviao implements Serializable, Concept {
         return aceleracaoMotor;
     }
 
-    public void setAceleracaoMotor(float aceleracaoMotor) {
-        if (aceleracaoMotor > 0) {
+    public float setAceleracaoMotor(float aceleracaoMotor) {
+        if (combustivel > 0) {
+            if (aceleracaoMotor > 0) {
+                if (th != null) {
+                    if (th.isAlive()) {
+                        th.stop();
+                    }
+                }
+                th = new Thread(new GastaCommbustivel());
+
+                th.start();
+
+            } else {
+                if (th != null) {
+                    th.stop();
+                }
+                th = null;
+            }
+            this.aceleracaoMotor = aceleracaoMotor;
+            return aceleracaoMotor;
+        } else {
             if (th != null) {
                 if (th.isAlive()) {
                     th.stop();
                 }
             }
-            th = new Thread(new GastaCommbustivel());
-
-            th.start();
-
-        } else {
-            if (th != null) {
-                th.stop();
-            }
-            th = null;
         }
-        this.aceleracaoMotor = aceleracaoMotor;
+
+        return 0;
     }
 
     public float getNilveCombustivel() {
-        return (float) combustivel * 100 / tamanhoTanque;
+        return (float) combustivel / tamanhoTanque;
     }
 
     public int getCombustivel() {

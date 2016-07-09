@@ -22,13 +22,15 @@ public class Decolar implements Concept, Serializable {
     private Piloto _piloto;
     private Aeroporto _aeroporto;
     private AID _actor;
+    private String _replyWith;
 
-    public Decolar(Aviao _aviao, Piloto _piloto, Aeroporto _aeroporto, AID _actor) {
+    public Decolar(Aviao _aviao, Piloto _piloto, Aeroporto _aeroporto, AID _actor, String _replyWith) {
         this._aviao = _aviao;
         this._piloto = _piloto;
         this._aeroporto = _aeroporto;
         this._actor = _actor;
-        
+        this._replyWith = _replyWith;
+
         _aviao.setAceleracaoMotor(0);
     }
 
@@ -54,6 +56,22 @@ public class Decolar implements Concept, Serializable {
 
     public void setAeroporto(Aeroporto aeroporto) {
         this._aeroporto = aeroporto;
+    }
+
+    public AID getActor() {
+        return _actor;
+    }
+
+    public void setActor(AID _actor) {
+        this._actor = _actor;
+    }
+
+    public String getReplyWith() {
+        return _replyWith;
+    }
+
+    public void setReplyWith(String _replyWith) {
+        this._replyWith = _replyWith;
     }
 
 }

@@ -9,9 +9,11 @@ import caiaja.CAIAJa;
 import caiaja.model.Aeroporto;
 import caiaja.model.Aviao;
 import caiaja.model.Controlador;
+import caiaja.model.Incendio;
 import caiaja.model.Piloto;
 import caiaja.ontologia.CAIAJaOntologia;
 import caiaja.ontologia.acoes.Decolar;
+import caiaja.ontologia.acoes.Pousar;
 import jade.content.lang.sl.SLCodec;
 import jade.content.onto.Ontology;
 import jade.core.AID;
@@ -83,6 +85,32 @@ public class PilotoAgent extends Agent {
         }
     }
 
+    @Override
+    public void doDelete() {
+        if (emvoo) {
+
+            int intencidade = 10 * aviao.getMotores() * (aviao.getCombustivel() + 1) * aviao.getTamanhoTanque() + 1;
+
+            System.out.println("Acidente com " + aviao.getPrefixo() + ": Anunciando incendio (" + intencidade + ") em " + aeroportoModel.getNome());
+
+            Incendio incendio_modelo = new Incendio(intencidade);
+
+            ACLMessage avistaincendio = new ACLMessage(ACLMessage.PROPAGATE);
+
+            avistaincendio.addReceiver(aeroportoAgent);
+            avistaincendio.addReceiver(controladorAgent);
+            try {
+                avistaincendio.setContentObject(incendio_modelo);
+            } catch (IOException ex) {
+                Logger.getLogger(PilotoAgent.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            this.send(avistaincendio);
+
+        }
+
+        super.doDelete(); //To change body of generated methods, choose Tools | Templates.
+    }
+
     private class BuscarAtividade extends TickerBehaviour {
 
         public BuscarAtividade(Agent a, long period) {
@@ -112,97 +140,35 @@ public class PilotoAgent extends Agent {
                     myAgent.addBehaviour(new ConsultarControlador(myAgent));
 
                 } else if (emvoo) {
-                    aviao.setAceleracaoMotor(0.3f);
-                    System.out.println(piloto.getNome() + ": Em voo com " + aviao.getPrefixo());
+                    if (aviao.getCombustivel() == 0) {
+                        doDelete();
+                    } else {
+                        aviao.setAceleracaoMotor(0.3f);
+//                        System.out.println(piloto.getNome() + ": Em voo com " + aviao.getPrefixo());
 
-                    //propõe pouso depois de 1 minuto pilotando
-                    propoePousar();
+                        if (aviao.getNilveCombustivel() < 0.3f) {
+                            System.out.println(piloto.getNome() + " " + aviao.getPrefixo() + ": Preciso pousar combustível baixo (" + aviao.getNilveCombustivel() + ")");
+                            myAgent.addBehaviour(new PilotoAgent.PropoePousar(myAgent));
+                        } else {
+                            System.out.println(piloto.getNome() + " " + aviao.getPrefixo() + ": Ainda tenho combustível (" + aviao.getNilveCombustivel() + ")");
+
+                        }
+                    }
 
                 } else if (aeroportoModel != null) {
 
-                    if (aviao.getNilveCombustivel() > 0.9f) {
+                    if (aviao.getNilveCombustivel() > 0.4f) {
                         myAgent.addBehaviour(new PilotoAgent.PropoeDecolar(myAgent));
                     } else {
                         //TODO Criar comportamento pra abastecer
                         /**
                          * chama abastecedor
                          */
-                        System.err.println("Taquen não está cheio" + aviao.getPrefixo());
+                        System.err.println("Tanque não está cheio" + aviao.getPrefixo());
 
                     }
                 }
             }
-        }
-
-        /*
-         Método que com InnerClasses que fazem o Caso de Uso de pouso do piloto:
-         */
-        public void propoePousar() {
-            SequentialBehaviour propoePousar = new SequentialBehaviour(myAgent) {
-                @Override
-                public int onEnd() {
-                    emvoo = false;
-                    myAgent.doDelete();
-
-                    return 0;
-                }
-
-            };
-
-            long time = (long) (60000 + Math.random() * 60000);
-            //propoePousar.addSubBehaviour(new WakerBehaviour(myAgent, time) {
-            propoePousar.addSubBehaviour(new WakerBehaviour(myAgent, 20) {
-                @Override
-                protected void onWake() {
-                    ACLMessage msg = new ACLMessage(ACLMessage.PROPOSE);
-                    msg.setContent("Pousar");
-                    msg.addReceiver(controladorAgent);
-                    msg.setConversationId("proposta-pouso");
-                    System.out.println("Piloto " + piloto.getNome() + " Enviando proposta de pouso");
-                    send(msg);
-                    stop();
-                }
-
-            });
-
-            propoePousar.addSubBehaviour(new TickerBehaviour(myAgent, 200) {
-                @Override
-                protected void onTick() {
-                    //System.err.println("\nCHEGOU AQUI\n");
-                    MessageTemplate mt1 = MessageTemplate.MatchPerformative(ACLMessage.ACCEPT_PROPOSAL);
-                    MessageTemplate mt2 = MessageTemplate.MatchConversationId("pouso-autorizado");
-                    MessageTemplate mt = MessageTemplate.and(mt1, mt2);
-
-                    ACLMessage msg = myAgent.receive(mt);
-
-                    if (msg != null) {
-                        if (msg.getConversationId().equalsIgnoreCase("pouso-autorizado")) {
-                            System.out.println("Piloto " + piloto.getNome() + " preparando para pouso.");
-                            stop();
-                        }
-                    } else {
-                        block();
-                    }
-                }
-            });
-
-            propoePousar.addSubBehaviour(new OneShotBehaviour(myAgent) {
-                @Override
-                public void action() {
-                    //aviao x pousado com sucesso
-                    ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
-                    msg.setConversationId("pouso-sucesso");
-                    System.out.println("Piloto " + piloto.getNome() + " informa que o pouso da aeronave " + aviao.getPrefixo() + " foi realizado com sucesso");
-                    myAgent.send(msg);
-                    emvoo = false;
-                }
-            });
-
-            // TODO: reiniciar atributos do Piloto
-            // TODO: colocar avião no Aeroporto e remover avião do Piloto
-            propoePousar.addSubBehaviour(this);
-
-            addBehaviour(propoePousar);
         }
 
     }
@@ -324,54 +290,169 @@ public class PilotoAgent extends Agent {
 
     }
 
-    private class acaoDecolar extends OneShotBehaviour {
+    /**
+     * Class para Criar o comportamento de pouso
+     */
+    private class PropoePousar extends Behaviour {
 
-        // Local variables
-        Behaviour queryBehaviour = null;
-        Behaviour requestBehaviour = null;
+        int estado = 0;
+        private MessageTemplate mt;
+        int estado_final = 10;
+        Pousar pousar;
 
-        // Constructor
-        public acaoDecolar(Agent myAgent) {
+        public PropoePousar(Agent myAgent) {
             super(myAgent);
+            emAcao = true;
         }
 
         @Override
         public void action() {
-//            try {
-            Decolar dec = new Decolar(aviao, piloto, aeroportoModel, myAgent.getAID());
-            dec.setAviao(((PilotoAgent) myAgent).aviao);
-            dec.setAeroporto(((PilotoAgent) myAgent).aeroportoModel);
+//            System.out.println(piloto.getNome() + ": Pousar " + estado);
+            switch (estado) {
+                case 0: {
+                    ACLMessage proposta = new ACLMessage(ACLMessage.PROPOSE);
+                    if (controladorAgent != null) {
+                        System.out.println(piloto.getNome() + ": Solicitando permissão para pousar " + controladorModel.getNome());
+                        proposta.addReceiver(controladorAgent);
 
-            Ontology o = myAgent.getContentManager().lookupOntology(CAIAJaOntologia.NAME);
-            // Create an ACL message to query the engager agent if the above fact is true or false
-//                ACLMessage queryMsg = new ACLMessage(ACLMessage.QUERY_IF);
-//                queryMsg.addReceiver(((PilotoAgent) myAgent).Controlador);
-//                queryMsg.setLanguage(FIPANames.ContentLanguage.FIPA_SL0);
-//                queryMsg.setOntology(CAIAJaOntologia.NAME);
-            // Write the works for predicate in the :content slot of the message
+                        aviao.setAceleracaoMotor(0);
 
-//                try {
-//                    myAgent.getContentManager().fillContent(queryMsg, dec);
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
-            // Create and add a behaviour to query the engager agent whether
-            // person p already works for company c following a FIPAQeury protocol
-//                queryBehaviour = new CheckAlreadyWorkingBehaviour(myAgent, queryMsg);
-//                addSubBehaviour(queryBehaviour);
-//            } catch (IOException ioe) {
-//                System.err.println("I/O error: " + ioe.getMessage());
-//            }
+                        proposta.setConversationId("proposta-piloto-pousar");
+                        proposta.setReplyWith("cfp" + System.currentTimeMillis());
+
+                        pousar = new Pousar(aviao, piloto, aeroportoModel, myAgent.getAID(), proposta.getReplyWith());
+
+                        try {
+                            proposta.setContentObject(pousar);
+                        } catch (IOException ex) {
+                            Logger.getLogger(PilotoAgent.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+
+                        myAgent.send(proposta);
+
+                        mt = MessageTemplate.and(MessageTemplate.MatchConversationId("proposta-piloto-pousar"),
+                                MessageTemplate.MatchInReplyTo(proposta.getReplyWith()));
+                        estado = 1;
+                    } else {
+                        estado = estado_final;
+                    }
+                    break;
+                }
+                case 1: {
+                    ACLMessage reply = myAgent.receive(mt);
+                    if (reply != null) {
+                        if (reply.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
+
+                            ACLMessage msg;
+
+                            msg = new ACLMessage(ACLMessage.REQUEST);
+
+                            msg.setConversationId("liberacao-piloto-pousar");
+                            msg.setReplyWith("confirm" + System.currentTimeMillis());
+
+                            msg.addReceiver(reply.getSender());
+
+                            System.out.println(piloto.getNome() + ": Aguardando liberação para pousar " + aviao.getPrefixo());
+                            estado = 2;
+                            try {
+                                msg.setContentObject(pousar);
+                            } catch (IOException ex) {
+                                Logger.getLogger(ControladorAgent.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+
+                            mt = MessageTemplate.and(
+                                    MessageTemplate.MatchConversationId(msg.getConversationId()),
+                                    MessageTemplate.MatchInReplyTo(msg.getReplyWith())
+                            );
+
+                            myAgent.send(msg);
+
+                        } else {
+                            if (aviao.getCombustivel() == 0) {
+                                myAgent.doDelete();
+                            }
+                            emAcao = false;
+                            estado = estado_final;
+                        }
+                    } else {
+                        block();
+                    }
+                    break;
+                }
+                case 2: {
+                    /**
+                     * Pouso aprovado, aguardando clearance para pouso
+                     */
+                    ACLMessage reply = myAgent.receive(mt);
+                    System.err.println("Aguardando pouso");
+                    if (reply != null) {
+                        if (reply.getPerformative() == ACLMessage.CONFIRM) {
+                            aeroportoAgent = reply.getSender();
+                            System.out.println(piloto.getNome() + ": pousando " + aviao.getPrefixo());
+                            aviao.setAceleracaoMotor(1f);
+                            estado = 3;
+                        } else if (reply.getPerformative() == ACLMessage.CANCEL) {
+                            System.out.println(piloto.getNome() + ": Pouso cancelado pelo controlador " + controladorModel.getNome() + "");
+                            emAcao = false;
+                            estado = estado_final;
+                        } else {
+                            System.out.println(piloto.getNome() + ": Aguardando confirmação do controlador para pouso" + controladorModel.getNome() + "");
+                        }
+                    } else {
+                        block();
+                    }
+                    break;
+                }
+                case 3: {
+                    block(2000);
+
+                    ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+
+                    msg.setConversationId("sucesso-piloto-pouso");
+                    msg.setReplyWith("pouso" + System.currentTimeMillis());
+
+                    msg.addReceiver(controladorAgent);
+
+                    System.out.println(piloto.getNome() + ": informando pouso com sucesso " + aviao.getPrefixo());
+
+                    myAgent.send(msg);
+
+                    aviao.setAceleracaoMotor(0.3f);
+
+                    emvoo = true;
+                    emAcao = false;
+                    estado = 5;
+
+                    break;
+                }
+                case 5: {
+                    break;
+                }
+            }
+        }
+
+        @Override
+        public boolean done() {
+            if (estado == 5) {
+                return true;
+            }
+            if (estado == estado_final) {
+                return true;
+            }
+            return false;
         }
 
     }
 
+    /**
+     * Class para Criar o comportamento de Decolagem
+     */
     private class PropoeDecolar extends Behaviour {
 
         int estado = 0;
-        private MessageTemplate mt; // The template to receive replies
-        private int repliesCnt = 0;
+        private MessageTemplate mt;
         int estado_final = 10;
+        Decolar decolar;
 
         public PropoeDecolar(Agent myAgent) {
             super(myAgent);
@@ -385,15 +466,16 @@ public class PilotoAgent extends Agent {
                 case 0: {
                     ACLMessage proposta = new ACLMessage(ACLMessage.PROPOSE);
                     if (controladorAgent != null) {
-                        System.out.println(piloto.getNome() + " --> " + controladorModel.getNome());
+                        System.out.println(piloto.getNome() + ": Solicitando permissão para decolar " + controladorModel.getNome());
                         proposta.addReceiver(controladorAgent);
 
                         aviao.setAceleracaoMotor(0);
 
-                        Decolar decolar = new Decolar(aviao, piloto, aeroportoModel, myAgent.getAID());
-
                         proposta.setConversationId("proposta-piloto-decolar");
                         proposta.setReplyWith("cfp" + System.currentTimeMillis());
+
+                        decolar = new Decolar(aviao, piloto, aeroportoModel, myAgent.getAID(), proposta.getReplyWith());
+
                         try {
                             proposta.setContentObject(decolar);
                         } catch (IOException ex) {
@@ -401,7 +483,7 @@ public class PilotoAgent extends Agent {
                         }
 
                         myAgent.send(proposta);
-                        // Prepare the template to get proposals
+
                         mt = MessageTemplate.and(MessageTemplate.MatchConversationId("proposta-piloto-decolar"),
                                 MessageTemplate.MatchInReplyTo(proposta.getReplyWith()));
                         estado = 1;
@@ -428,7 +510,7 @@ public class PilotoAgent extends Agent {
                                 System.out.println(piloto.getNome() + ": Aguardando liberação para decolar " + aviao.getPrefixo());
                                 estado = 2;
                                 try {
-                                    msg.setContentObject(piloto);
+                                    msg.setContentObject(decolar);
                                 } catch (IOException ex) {
                                     Logger.getLogger(ControladorAgent.class.getName()).log(Level.SEVERE, null, ex);
                                 }
@@ -450,6 +532,7 @@ public class PilotoAgent extends Agent {
                             myAgent.send(msg);
 
                         } else {
+                            emAcao = false;
                             estado = estado_final;
                         }
                     } else {
@@ -462,18 +545,19 @@ public class PilotoAgent extends Agent {
                      * Decolagem aprovada, aguardando clearance para decolagem
                      */
                     ACLMessage reply = myAgent.receive(mt);
+                    System.err.println("Aguardando");
                     if (reply != null) {
                         if (reply.getPerformative() == ACLMessage.CONFIRM) {
                             aeroportoAgent = reply.getSender();
                             System.out.println(piloto.getNome() + ": decolando " + aviao.getPrefixo());
                             aviao.setAceleracaoMotor(1f);
-                            emvoo = true;
+                            estado = 4;
+                        } else if (reply.getPerformative() == ACLMessage.CANCEL) {
+                            System.out.println(piloto.getNome() + ": Decolagem cancelada pelo controlador " + controladorModel.getNome() + "");
                             emAcao = false;
                             estado = estado_final;
-                        } else if (reply.getPerformative() == ACLMessage.DISCONFIRM) {
-                            System.out.println(piloto.getNome() + ": decolagem cancelada pelo controlado " + controladorModel.getNome() + "");
-                            emAcao = false;
-                            estado = estado_final;
+                        } else {
+                            System.out.println(piloto.getNome() + ": Aguardando confirmação do controlador " + controladorModel.getNome() + "");
                         }
                     } else {
                         block();
@@ -499,6 +583,26 @@ public class PilotoAgent extends Agent {
                     break;
                 }
                 case 4: {
+                    block(2000);
+
+                    ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+
+                    msg.setConversationId("sucesso-piloto-decolar");
+                    msg.setReplyWith("decolar" + System.currentTimeMillis());
+
+                    msg.addReceiver(controladorAgent);
+
+                    System.out.println(piloto.getNome() + ": informando decolagem com sucesso " + aviao.getPrefixo());
+
+                    myAgent.send(msg);
+
+                    emvoo = true;
+                    emAcao = false;
+                    estado = 5;
+
+                    break;
+                }
+                case 5: {
                     break;
                 }
             }
@@ -506,7 +610,7 @@ public class PilotoAgent extends Agent {
 
         @Override
         public boolean done() {
-            if (estado == 4) {
+            if (estado == 5) {
                 return true;
             }
             if (estado == estado_final) {
