@@ -166,17 +166,17 @@ public class PilotoAgent extends Agent {
                          * chama abastecedor
                          */
                         System.err.println("Tanque não tem combustível suficiente para voo..." + aviao.getPrefixo());
-                        
+
                         List<AID> abastecedores = CAIAJa.getServico(myAgent, "Abastecedor");
-                        myAgent.addBehaviour(new PilotoAgent.PropoeAbastecer(myAgent, abastecedores));
+                        myAgent.addBehaviour(new PilotoAgent.RequisicaoAbastecer(myAgent, abastecedores));
                     }
                 }
             }
         }
 
     }
-    
-    private class PropoeAbastecer extends Behaviour {
+
+    private class RequisicaoAbastecer extends Behaviour {
 
         List<AID> lista_abastecedores;
         AID Escolhido;
@@ -185,7 +185,7 @@ public class PilotoAgent extends Agent {
         private MessageTemplate mt; // The template to receive replies
         private int repliesCnt = 0;
 
-        public PropoeAbastecer(Agent a, List<AID> abastecedores) {
+        public RequisicaoAbastecer(Agent a, List<AID> abastecedores) {
             super(a);
             lista_abastecedores = abastecedores;
         }
@@ -293,7 +293,7 @@ public class PilotoAgent extends Agent {
             return false;
         }
 
-    }    
+    }
 
     private class PropoePilotar extends Behaviour {
 
@@ -541,10 +541,29 @@ public class PilotoAgent extends Agent {
 
                     aviao.setAceleracaoMotor(0.3f);
 
-                    emvoo = true;
+                    emvoo = false;
                     emAcao = false;
-                    estado = 5;
 
+                    //msg.setReplyWith("cfp" + System.currentTimeMillis());
+                    //MessageTemplate mt1 = MessageTemplate.MatchPerformative(ACLMessage.PROPOSE);
+                    MessageTemplate mt1 = MessageTemplate.MatchInReplyTo(msg.getReplyWith());
+                    MessageTemplate mt2 = MessageTemplate.MatchConversationId("abastecer-piloto");
+                    mt = MessageTemplate.and(mt1, mt2);
+                    estado = 4;
+                    break;
+                }
+                case 4: {
+                    ACLMessage msg = myAgent.receive(mt);
+                    if (msg != null) {
+                        ACLMessage reply = msg.createReply();
+                        if (reply.getPerformative() == ACLMessage.PROPOSE) {
+                            msg.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
+                            msg.setConversationId("abastecer-piloto");
+                            msg.addReceiver(reply.getSender());
+                            send(msg);
+                        }
+                            estado = 5;
+                    }
                     break;
                 }
                 case 5: {
