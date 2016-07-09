@@ -141,19 +141,15 @@ public class PilotoAgent extends Agent {
                     myAgent.addBehaviour(new ConsultarControlador(myAgent));
 
                 } else if (emvoo) {
-                    if (aviao.getCombustivel() == 0) {
-                        doDelete();
-                    } else {
-                        aviao.setAceleracaoMotor(0.3f);
+                    aviao.setAceleracaoMotor(0.3f);
 //                        System.out.println(piloto.getNome() + ": Em voo com " + aviao.getPrefixo());
 
-                        if (aviao.getNilveCombustivel() < 0.3f) {
-                            System.out.println(piloto.getNome() + " " + aviao.getPrefixo() + ": Preciso pousar combustível baixo (" + aviao.getNilveCombustivel() + ")");
-                            myAgent.addBehaviour(new PilotoAgent.PropoePousar(myAgent));
-                        } else {
-                            System.out.println(piloto.getNome() + " " + aviao.getPrefixo() + ": Ainda tenho combustível (" + aviao.getNilveCombustivel() + ")");
+                    if (aviao.getNilveCombustivel() < 0.3f) {
+                        System.out.println(piloto.getNome() + " " + aviao.getPrefixo() + ": Preciso pousar combustível baixo (" + aviao.getNilveCombustivel() + ")");
+                        myAgent.addBehaviour(new PilotoAgent.PropoePousar(myAgent));
+                    } else {
+                        System.out.println(piloto.getNome() + " " + aviao.getPrefixo() + ": Ainda tenho combustível (" + aviao.getNilveCombustivel() + ")");
 
-                        }
                     }
 
                 } else if (aeroportoModel != null) {
@@ -171,6 +167,8 @@ public class PilotoAgent extends Agent {
                         myAgent.addBehaviour(new PilotoAgent.RequisicaoAbastecer(myAgent, abastecedores));
                     }
                 }
+            } else if (aviao.getCombustivel() == 0 && emvoo) {
+                doDelete();
             }
         }
 
@@ -562,7 +560,7 @@ public class PilotoAgent extends Agent {
                             msg.addReceiver(reply.getSender());
                             send(msg);
                         }
-                            estado = 5;
+                        estado = 5;
                     }
                     break;
                 }
@@ -602,7 +600,7 @@ public class PilotoAgent extends Agent {
 
         @Override
         public void action() {
-//            System.out.println(piloto.getNome() + ": Decolar " + estado);
+            System.out.println(piloto.getNome() + ": Decolar " + estado);
             switch (estado) {
                 case 0: {
                     ACLMessage proposta = new ACLMessage(ACLMessage.PROPOSE);
@@ -686,8 +684,9 @@ public class PilotoAgent extends Agent {
                      * Decolagem aprovada, aguardando clearance para decolagem
                      */
                     ACLMessage reply = myAgent.receive(mt);
-                    System.err.println("Aguardando");
+//                    System.err.println(piloto.getNome() + ": Aguardando");
                     if (reply != null) {
+                        System.err.println(piloto.getNome() + ": replay " + reply);
                         if (reply.getPerformative() == ACLMessage.CONFIRM) {
                             aeroportoAgent = reply.getSender();
                             System.out.println(piloto.getNome() + ": decolando " + aviao.getPrefixo());
@@ -701,7 +700,7 @@ public class PilotoAgent extends Agent {
                             System.out.println(piloto.getNome() + ": Aguardando confirmação do controlador " + controladorModel.getNome() + "");
                         }
                     } else {
-                        block();
+                        block(100);
                     }
                     break;
                 }
@@ -719,12 +718,16 @@ public class PilotoAgent extends Agent {
 
                         }
                     } else {
-                        block();
+                        block(100);
                     }
                     break;
                 }
                 case 4: {
-                    block(2000);
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(PilotoAgent.class.getName()).log(Level.SEVERE, null, ex);
+                    }
 
                     ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
 
