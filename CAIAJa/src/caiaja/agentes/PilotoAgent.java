@@ -6,6 +6,7 @@
 package caiaja.agentes;
 
 import caiaja.CAIAJa;
+import caiaja.model.Abastecedor;
 import caiaja.model.Aeroporto;
 import caiaja.model.Aviao;
 import caiaja.model.Controlador;
@@ -164,14 +165,135 @@ public class PilotoAgent extends Agent {
                         /**
                          * chama abastecedor
                          */
-                        System.err.println("Tanque não está cheio" + aviao.getPrefixo());
-
+                        System.err.println("Tanque não tem combustível suficiente para voo..." + aviao.getPrefixo());
+                        
+                        List<AID> abastecedores = CAIAJa.getServico(myAgent, "Abastecedor");
+                        myAgent.addBehaviour(new PilotoAgent.PropoeAbastecer(myAgent, abastecedores));
                     }
                 }
             }
         }
 
     }
+    
+    private class PropoeAbastecer extends Behaviour {
+
+        List<AID> lista_abastecedores;
+        AID Escolhido;
+        Abastecedor abastecedorModel;
+        int estado = 0;
+        private MessageTemplate mt; // The template to receive replies
+        private int repliesCnt = 0;
+
+        public PropoeAbastecer(Agent a, List<AID> abastecedores) {
+            super(a);
+            lista_abastecedores = abastecedores;
+        }
+
+        @Override
+        public void action() {
+            //System.out.println(piloto.getNome() + ": Pilotar " + estado);
+            switch (estado) {
+                case 0: {
+                    ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
+
+                    for (AID abastecedor : lista_abastecedores) {
+                        System.out.println(piloto.getNome() + " --> " + abastecedor.getLocalName());
+                        cfp.addReceiver(abastecedor);
+                    }
+                    cfp.setConversationId("proposta-abastecedor");
+                    cfp.setReplyWith("cfp" + System.currentTimeMillis());
+                    cfp.setContent("Preciso de um abastecedor");
+                    myAgent.send(cfp);
+                    // Prepare the template to get proposals
+                    mt = MessageTemplate.and(MessageTemplate.MatchConversationId("proposta-abastecedor"),
+                            MessageTemplate.MatchInReplyTo(cfp.getReplyWith()));
+                    estado = 1;
+                    break;
+                }
+                case 1: {
+                    ACLMessage reply = myAgent.receive(mt);
+
+                    if (reply != null) {
+                        // Reply received
+                        if (reply.getPerformative() == ACLMessage.PROPOSE) {
+                            Escolhido = reply.getSender();
+                            try {
+                                abastecedorModel = (Abastecedor) reply.getContentObject();
+                            } catch (UnreadableException ex) {
+                                Logger.getLogger(PilotoAgent.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                        }
+
+                        repliesCnt++;
+                        if (repliesCnt >= lista_abastecedores.size()) {
+                            estado = 2;
+                        }
+                    } else {
+                        block();
+                    }
+                    break;
+                }
+                case 2: {
+                    ACLMessage msg = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
+                    msg.addReceiver(Escolhido);
+//                    controlar.setContent("Aceito controlar");
+                    try {
+                        msg.setContentObject(piloto);
+                    } catch (IOException ex) {
+                        Logger.getLogger(ControladorAgent.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    msg.setConversationId("proposta-abastecedor");
+                    msg.setReplyWith("abastecer" + System.currentTimeMillis());
+                    myAgent.send(msg);
+                    System.out.println(piloto.getNome() + " --> " + Escolhido.getLocalName() + ": Aceito Proposta");
+
+                    mt = MessageTemplate.and(MessageTemplate.MatchConversationId("proposta-abastecedor"),
+                            MessageTemplate.MatchInReplyTo(msg.getReplyWith()));
+                    estado = 3;
+                    break;
+                }
+                case 3: {
+                    ACLMessage reply = myAgent.receive(mt);
+                    if (reply != null) {
+                        if (reply.getPerformative() == ACLMessage.INFORM) {
+                            aeroportoAgent = reply.getSender();
+                            try {
+                                aviao = ((Aviao) reply.getContentObject());
+                                System.out.println(piloto.getNome() + ": Aviao " + aviao.getPrefixo() + " sendo abastecido");
+                                aviao.setAceleracaoMotor(0.00f);
+                            } catch (UnreadableException ex) {
+                                Logger.getLogger(PilotoAgent.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+
+                        } else {
+                            System.out.println(aviao.getPrefixo() + ": não pode ser abastecido " + Escolhido.getLocalName() + " já está ocupado");
+                        }
+
+                        estado = 4;
+                    } else {
+                        block();
+                    }
+                    break;
+                }
+                case 4: {
+                    break;
+                }
+            }
+        }
+
+        @Override
+        public boolean done() {
+            if (estado == 4) {
+                return true;
+            }
+            if (estado > 1 && Escolhido == null) {
+                return true;
+            }
+            return false;
+        }
+
+    }    
 
     private class PropoePilotar extends Behaviour {
 
