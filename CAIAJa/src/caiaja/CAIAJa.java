@@ -71,7 +71,7 @@ public class CAIAJa {
          */
         try {
 
-            AgentController Aeroporto = ac.createNewAgent("AeroportoSBBV", "caiaja.agentes.AeroportoAgent", new String[]{"", "SBBV", "Atlas Brasil Catanhede", "2700"});
+            AgentController Aeroporto = ac.createNewAgent("AeroportoSBBV", "caiaja.agentes.AeroportoAgent", new String[]{"", "SBBV", "Atlas Brasil Catanhete", "2700"});
             Aeroporto.start();
 
             for (String piloto : Pilotos) {
