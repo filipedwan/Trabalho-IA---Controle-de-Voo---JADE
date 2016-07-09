@@ -8,15 +8,13 @@ package caiaja.agentes;
 import caiaja.CAIAJa;
 import caiaja.model.Aeroporto;
 import caiaja.model.Bombeiro;
+import caiaja.model.Incendio;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
+import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.TickerBehaviour;
-import jade.domain.DFService;
-import jade.domain.FIPAAgentManagement.DFAgentDescription;
-import jade.domain.FIPAAgentManagement.ServiceDescription;
-import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.lang.acl.UnreadableException;
@@ -32,30 +30,34 @@ import java.util.logging.Logger;
  */
 public class BombeiroAgent extends Agent {
 
-    private Bombeiro bombeiro;
-    private Aeroporto aeroporto_base;
-    private AID aeroporto;
+    private Bombeiro bombeiro_modelo;
+    private Aeroporto aeroporto_modelo;
+    private List<Incendio> lista_incendio_modelo;
+    private AID aeroporto_agente;
     private boolean ativo;
+    Thread combateIncendio;
 
     protected void setup() {
         Object[] args = getArguments();
 
-        bombeiro = new Bombeiro();
-        aeroporto = null;
-        aeroporto_base = null;
+        bombeiro_modelo = new Bombeiro();
+        aeroporto_agente = null;
+        aeroporto_modelo = null;
         ativo = false;
+        lista_incendio_modelo = new ArrayList<>();
 
         if (args != null) {
             if (args.length > 0) {
-                bombeiro.setNome((String) args[0]);
+                bombeiro_modelo.setNome((String) args[0]);
 
-                System.out.println("Bombeiro " + bombeiro.getNome() + " aguardando trabalho");
+                System.out.println("Bombeiro " + bombeiro_modelo.getNome() + " aguardando trabalho");
 
-                CAIAJa.registrarServico(this, "Bombeiro", bombeiro.getNome());
-                
+                CAIAJa.registrarServico(this, "Bombeiro", bombeiro_modelo.getNome());
+
                 addBehaviour(new BombeiroAgent.BuscarEmprego(this, 5000));
 
                 addBehaviour(new BombeiroAgent.AguardaAlertaDeIncendio());
+
             }
         }
     }
@@ -68,11 +70,27 @@ public class BombeiroAgent extends Agent {
 
         @Override
         protected void onTick() {
-            if (aeroporto_base == null) {
+            if (aeroporto_modelo == null) {
                 myAgent.addBehaviour(new BombeiroAgent.PropoeTrabalhar(CAIAJa.getServico(myAgent, "Aeroporto")));
             } else {
-                System.out.println("Bombeiro " + bombeiro.getNome() + ": trabalhando em " + aeroporto_base.getNome());
+                System.out.println("Bombeiro " + bombeiro_modelo.getNome() + ": trabalhando em " + aeroporto_modelo.getNome());
 
+                System.out.println("Bombeiro " + bombeiro_modelo.getNome() + ": Ativando incendio em " + aeroporto_modelo.getNome());
+
+                Incendio incendio_modelo = new Incendio(5);
+
+                lista_incendio_modelo.add(incendio_modelo);
+                if (!ativo) {
+
+                    if (combateIncendio == null) {
+                        combateIncendio = new Thread(new CombateIncendio((BombeiroAgent) myAgent));
+                    } else if (!combateIncendio.isAlive()) {
+                        combateIncendio.stop();
+                        combateIncendio = new Thread(new CombateIncendio((BombeiroAgent) myAgent));
+                    }
+                    combateIncendio.start();
+
+                }
                 block(1000);
             }
         }
@@ -93,13 +111,13 @@ public class BombeiroAgent extends Agent {
 
         @Override
         public void action() {
-            System.out.println("Bombeiro " + bombeiro.getNome() + ": Trabalho bombeiro " + estado);
+            System.out.println("Bombeiro " + bombeiro_modelo.getNome() + ": Trabalho bombeiro " + estado);
             switch (estado) {
                 case 0: {
                     ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
 
                     for (AID aeroporto : aeroportos) {
-                        System.out.println("Bombeiro " + bombeiro.getNome() + " --> " + aeroporto.getName());
+                        System.out.println("Bombeiro " + bombeiro_modelo.getNome() + " --> " + aeroporto.getName());
                         cfp.addReceiver(aeroporto);
                     }
                     cfp.setConversationId("proposta-bombeiro");
@@ -120,7 +138,7 @@ public class BombeiroAgent extends Agent {
                         if (reply.getPerformative() == ACLMessage.PROPOSE) {
                             Escolhido = reply.getSender();
                             try {
-                                aeroporto_base = (Aeroporto) reply.getContentObject();
+                                aeroporto_modelo = (Aeroporto) reply.getContentObject();
                             } catch (UnreadableException ex) {
                                 Logger.getLogger(PilotoAgent.class.getName()).log(Level.SEVERE, null, ex);
                             }
@@ -140,14 +158,14 @@ public class BombeiroAgent extends Agent {
                     msg.addReceiver(Escolhido);
 //                    controlar.setContent("Aceito controlar");
                     try {
-                        msg.setContentObject(bombeiro);
+                        msg.setContentObject(bombeiro_modelo);
                     } catch (IOException ex) {
                         Logger.getLogger(ControladorAgent.class.getName()).log(Level.SEVERE, null, ex);
                     }
                     msg.setConversationId("proposta-bombeiro");
                     msg.setReplyWith("trabalhar" + System.currentTimeMillis());
                     myAgent.send(msg);
-                    System.out.println("Bombeiro " + bombeiro.getNome() + " --> " + Escolhido.getName() + ": Aceito Trabalhar");
+                    System.out.println("Bombeiro " + bombeiro_modelo.getNome() + " --> " + Escolhido.getName() + ": Aceito Trabalhar");
 
                     mt = MessageTemplate.and(MessageTemplate.MatchConversationId("proposta-bombeiro"),
                             MessageTemplate.MatchInReplyTo(msg.getReplyWith()));
@@ -158,11 +176,11 @@ public class BombeiroAgent extends Agent {
                     ACLMessage reply = myAgent.receive(mt);
                     if (reply != null) {
                         if (reply.getPerformative() == ACLMessage.INFORM) {
-                            aeroporto = reply.getSender();
-                            System.out.println("Bombeiro " + bombeiro.getNome() + ": trabalhando para o  " + aeroporto.getLocalName());
+                            aeroporto_agente = reply.getSender();
+                            System.out.println("Bombeiro " + bombeiro_modelo.getNome() + ": trabalhando para o  " + aeroporto_agente.getLocalName());
 
                         } else {
-                            System.out.println("Bombeiro " + bombeiro.getNome() + ": não foi contratado por " + Escolhido.getName() + " já conseguiu outro bombeiro");
+                            System.out.println("Bombeiro " + bombeiro_modelo.getNome() + ": não foi contratado por " + Escolhido.getName() + " já conseguiu outro bombeiro");
                         }
 
                         estado = 4;
@@ -191,6 +209,25 @@ public class BombeiroAgent extends Agent {
     }
 
     /**
+     * Classe para anunciar fim do incendio
+     */
+    private class AnunciaIncendioExtinto extends OneShotBehaviour {
+
+        public void action() {
+
+            ACLMessage anuncio = new ACLMessage(ACLMessage.PROPAGATE);
+
+            anuncio.setConversationId("incendio-extinto");
+            anuncio.setContent("Incendio Extinto");
+
+            System.err.println("bombeiro " + bombeiro_modelo.getNome() + ": Incendio extinto");
+            anuncio.addReceiver(aeroporto_agente);
+
+            myAgent.send(anuncio);
+        }
+    }
+
+    /**
      * Classe para responder aos requerimentos de controladores que precisem de
      * um aeroporto pra controlar, retonar sim ou não para a requisição
      */
@@ -203,17 +240,68 @@ public class BombeiroAgent extends Agent {
             ACLMessage msg = myAgent.receive(mt);
             if (msg != null) {
 
-                // CFP Message received. Process it
-                String title = msg.getContent();
                 ACLMessage reply = msg.createReply();
-                
-                reply.setContent("Ainda não sei apagar fogo :(");
+
+                try {
+                    Incendio incendio_modelo = (Incendio) msg.getContentObject();
+
+                    lista_incendio_modelo.add(incendio_modelo);
+                    if (ativo) {
+                        reply.setContent("Estou atendendo a outra ocorencia");
+                        System.err.println("bombeiro " + bombeiro_modelo.getNome() + ": já estou combatendo o incendio");
+                    } else {
+                        if (combateIncendio == null) {
+                            combateIncendio = new Thread(new CombateIncendio((BombeiroAgent) myAgent));
+                        } else if (!combateIncendio.isAlive()) {
+                            combateIncendio.stop();
+                            combateIncendio = new Thread(new CombateIncendio((BombeiroAgent) myAgent));
+                        }
+                        combateIncendio.start();
+                        reply.setContent("Estou pronto a caminho");
+                        System.err.println("bombeiro " + bombeiro_modelo.getNome() + ": já estou a caminho do incendio");
+                    }
+
+                } catch (UnreadableException ex) {
+
+                    reply.setContent("nao encontrei");
+                }
 
                 myAgent.send(reply);
             } else {
                 block();
             }
         }
+    }
+
+    private class CombateIncendio implements Runnable {
+
+        BombeiroAgent myAgent;
+
+        public CombateIncendio(BombeiroAgent bombeiro_agente) {
+            this.myAgent = bombeiro_agente;
+        }
+
+        @Override
+        public void run() {
+            myAgent.ativo = true;
+            while (myAgent.lista_incendio_modelo.size() > 0) {
+                Incendio incendio_modelo = myAgent.lista_incendio_modelo.get(0);
+                myAgent.lista_incendio_modelo.remove(0);
+
+                while (incendio_modelo.combateIncendio() > 0) {
+                    System.err.println("Combatendo o incendio (" + myAgent.lista_incendio_modelo.size() + ")");
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(BombeiroAgent.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+                System.err.println("Apaguei um incendio");
+            }
+            myAgent.ativo = false;
+            myAgent.addBehaviour(new AnunciaIncendioExtinto());
+        }
+
     }
 
 }
