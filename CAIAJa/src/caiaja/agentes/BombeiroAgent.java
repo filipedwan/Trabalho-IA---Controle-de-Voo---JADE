@@ -75,22 +75,21 @@ public class BombeiroAgent extends Agent {
             } else {
                 System.out.println("Bombeiro " + bombeiro_modelo.getNome() + ": trabalhando em " + aeroporto_modelo.getNome());
 
-                System.out.println("Bombeiro " + bombeiro_modelo.getNome() + ": Ativando incendio em " + aeroporto_modelo.getNome());
-
-                Incendio incendio_modelo = new Incendio(5);
-
-                lista_incendio_modelo.add(incendio_modelo);
-                if (!ativo) {
-
-                    if (combateIncendio == null) {
-                        combateIncendio = new Thread(new CombateIncendio((BombeiroAgent) myAgent));
-                    } else if (!combateIncendio.isAlive()) {
-                        combateIncendio.stop();
-                        combateIncendio = new Thread(new CombateIncendio((BombeiroAgent) myAgent));
-                    }
-                    combateIncendio.start();
-
-                }
+//                System.out.println("Bombeiro " + bombeiro_modelo.getNome() + ": Ativando incendio em " + aeroporto_modelo.getNome());
+//                Incendio incendio_modelo = new Incendio(5);
+//
+//                lista_incendio_modelo.add(incendio_modelo);
+//                if (!ativo) {
+//
+//                    if (combateIncendio == null) {
+//                        combateIncendio = new Thread(new CombateIncendio((BombeiroAgent) myAgent));
+//                    } else if (!combateIncendio.isAlive()) {
+//                        combateIncendio.stop();
+//                        combateIncendio = new Thread(new CombateIncendio((BombeiroAgent) myAgent));
+//                    }
+//                    combateIncendio.start();
+//
+//                }
                 block(1000);
             }
         }

@@ -97,6 +97,11 @@ public class Aviao implements Serializable, Concept {
 
             th.start();
 
+        } else {
+            if (th != null) {
+                th.stop();
+            }
+            th = null;
         }
         this.aceleracaoMotor = aceleracaoMotor;
     }
