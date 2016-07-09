@@ -47,10 +47,10 @@ public class PilotoAgent extends Agent {
 
     private Piloto piloto;
     private Aviao aviao;
-    private Aeroporto aeroporto_atual;
-    private Controlador Controlador_atual;
-    private AID aeroporto;
-    private AID Controlador;
+    private Aeroporto aeroportoModel;
+    private Controlador controladorModel;
+    private AID aeroportoAgent;
+    private AID controladorAgent;
     private boolean emvoo;
 
     protected void setup() {
@@ -58,9 +58,9 @@ public class PilotoAgent extends Agent {
 
         piloto = new Piloto();
         aviao = null;
-        aeroporto = null;
+        aeroportoAgent = null;
         emvoo = false;
-        aeroporto_atual = null;
+        aeroportoModel = null;
 
         if (args != null) {
             if (args.length > 0) {
@@ -101,7 +101,7 @@ public class PilotoAgent extends Agent {
 
                 myAgent.addBehaviour(new PilotoAgent.PropoePilotar(aerosportos));
 
-            } else if (Controlador == null) {
+            } else if (controladorAgent == null) {
                 /**
                  * Se não tem controlador busca um controlador
                  */
@@ -115,7 +115,7 @@ public class PilotoAgent extends Agent {
                 //propõe pouso depois de 1 minuto pilotando
                 propoePousar();
 
-            } else if (aeroporto_atual != null) {
+            } else if (aeroportoModel != null) {
 
                 if (aviao.getNilveCombustivel() > 0.9f) {
                     myAgent.addBehaviour(new PilotoAgent.PropoeDecolar());
@@ -153,7 +153,7 @@ public class PilotoAgent extends Agent {
                 protected void onWake() {
                     ACLMessage msg = new ACLMessage(ACLMessage.PROPOSE);
                     msg.setContent("Pousar");
-                    msg.addReceiver(Controlador);
+                    msg.addReceiver(controladorAgent);
                     msg.setConversationId("proposta-pouso");
                     System.out.println("Piloto " + piloto.getNome() + " Enviando proposta de pouso");
                     send(msg);
@@ -218,7 +218,8 @@ public class PilotoAgent extends Agent {
 
         @Override
         public void action() {
-            System.out.println(piloto.getNome() + ": Pilotar " + estado);
+            //System.out.println(piloto.getNome() + ": Pilotar " + estado);
+            System.out.println(piloto.getNome() + ": Pilotar");
             switch (estado) {
                 case 0: {
                     ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
@@ -245,7 +246,7 @@ public class PilotoAgent extends Agent {
                         if (reply.getPerformative() == ACLMessage.PROPOSE) {
                             Escolhido = reply.getSender();
                             try {
-                                aeroporto_atual = (Aeroporto) reply.getContentObject();
+                                aeroportoModel = (Aeroporto) reply.getContentObject();
                             } catch (UnreadableException ex) {
                                 Logger.getLogger(PilotoAgent.class.getName()).log(Level.SEVERE, null, ex);
                             }
@@ -283,7 +284,7 @@ public class PilotoAgent extends Agent {
                     ACLMessage reply = myAgent.receive(mt);
                     if (reply != null) {
                         if (reply.getPerformative() == ACLMessage.INFORM) {
-                            aeroporto = reply.getSender();
+                            aeroportoAgent = reply.getSender();
                             try {
                                 aviao = ((Aviao) reply.getContentObject());
                                 System.out.println(piloto.getNome() + ": Pilotando " + aviao.getPrefixo() + " motores ligados");
@@ -337,7 +338,7 @@ public class PilotoAgent extends Agent {
 //            try {
             Decolar dec = new Decolar();
             dec.setAviao(((PilotoAgent) myAgent).aviao);
-            dec.setAeroporto(((PilotoAgent) myAgent).aeroporto_atual);
+            dec.setAeroporto(((PilotoAgent) myAgent).aeroportoModel);
 
             Ontology o = myAgent.getContentManager().lookupOntology(CAIAJaOntologia.NAME);
             // Create an ACL message to query the engager agent if the above fact is true or false
@@ -380,13 +381,13 @@ public class PilotoAgent extends Agent {
             switch (estado) {
                 case 0: {
                     ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
-                    if (Controlador != null) {
-                        System.out.println(piloto.getNome() + " --> " + Controlador.getName());
-                        cfp.addReceiver(Controlador);
+                    if (controladorAgent != null) {
+                        System.out.println(piloto.getNome() + " --> " + controladorAgent.getName());
+                        cfp.addReceiver(controladorAgent);
 
                         cfp.setConversationId("proposta-piloto-decolar");
                         cfp.setReplyWith("cfp" + System.currentTimeMillis());
-                        cfp.setContent(aeroporto_atual.getPrefixo());
+                        cfp.setContent(aeroportoModel.getPrefixo());
 
                         myAgent.send(cfp);
                         // Prepare the template to get proposals
@@ -394,7 +395,7 @@ public class PilotoAgent extends Agent {
                                 MessageTemplate.MatchInReplyTo(cfp.getReplyWith()));
                         estado = 1;
                     } else {
-                        cfp.addReceiver(Controlador);
+                        cfp.addReceiver(controladorAgent);
                         estado = estado_final;
                     }
                     break;
@@ -405,7 +406,7 @@ public class PilotoAgent extends Agent {
                         if (reply.getPerformative() == ACLMessage.PROPOSE) {
 //                            ControladorEscolhido = reply.getSender();
                             try {
-                                Controlador_atual = (Controlador) reply.getContentObject();
+                                controladorModel = (Controlador) reply.getContentObject();
                             } catch (UnreadableException ex) {
                                 Logger.getLogger(PilotoAgent.class.getName()).log(Level.SEVERE, null, ex);
                             }
@@ -421,7 +422,7 @@ public class PilotoAgent extends Agent {
                 case 2: {
                     if (aviao.getNilveCombustivel() > 0.5f) {
                         ACLMessage msg = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
-                        msg.addReceiver(Controlador);
+                        msg.addReceiver(controladorAgent);
 
                         try {
                             msg.setContentObject(piloto);
@@ -431,7 +432,7 @@ public class PilotoAgent extends Agent {
                         msg.setConversationId("proposta-piloto-decolar");
                         msg.setReplyWith("decolar" + System.currentTimeMillis());
                         myAgent.send(msg);
-                        System.out.println(piloto.getNome() + " --> " + Controlador_atual.getNome() + ": Pronto pra decolar");
+                        System.out.println(piloto.getNome() + " --> " + controladorModel.getNome() + ": Pronto pra decolar");
 
                         mt = MessageTemplate.and(
                                 MessageTemplate.MatchConversationId("proposta-piloto-decolar"),
@@ -440,7 +441,7 @@ public class PilotoAgent extends Agent {
                         estado = 3;
                     } else {
                         ACLMessage msg = new ACLMessage(ACLMessage.REJECT_PROPOSAL);
-                        msg.addReceiver(Controlador);
+                        msg.addReceiver(controladorAgent);
 
                         try {
                             msg.setContentObject(piloto);
@@ -450,7 +451,7 @@ public class PilotoAgent extends Agent {
                         msg.setConversationId("proposta-piloto-decolar");
                         myAgent.send(msg);
 
-                        System.err.println(piloto.getNome() + " --> " + Controlador_atual.getNome() + ": To sem combustivel pra decolar");
+                        System.err.println(piloto.getNome() + " --> " + controladorModel.getNome() + ": To sem combustivel pra decolar");
 
                         estado = estado_final;
                     }
@@ -460,12 +461,12 @@ public class PilotoAgent extends Agent {
                     ACLMessage reply = myAgent.receive(mt);
                     if (reply != null) {
                         if (reply.getPerformative() == ACLMessage.INFORM) {
-                            aeroporto = reply.getSender();
+                            aeroportoAgent = reply.getSender();
                             System.out.println(piloto.getNome() + ": decolando " + aviao.getPrefixo());
                             aviao.setAceleracaoMotor(1f);
                             emvoo = true;
                         } else {
-                            System.out.println(piloto.getNome() + ": não pode decolar " + Controlador_atual.getNome() + " Decolagem abortada");
+                            System.out.println(piloto.getNome() + ": não pode decolar " + controladorModel.getNome() + " Decolagem abortada");
                         }
 
                         estado = 4;
@@ -514,10 +515,11 @@ public class PilotoAgent extends Agent {
                     ACLMessage msg = new ACLMessage(ACLMessage.QUERY_IF);
 
                     try {
-                        //                    msg.setContent(aeroporto_atual.getPrefixo());
-                        msg.setContentObject(aeroporto_atual);
+                        //                    msg.setContent(aeroportoModel.getPrefixo());
+                        msg.setContentObject(aeroportoModel);
 
-                        msg.setReplyWith("ccp" + System.currentTimeMillis());
+                        //msg.setReplyWith("ccp" + System.currentTimeMillis());
+                        msg.setReplyWith("qi" + System.currentTimeMillis());
 
                         msg.setConversationId("piloto-consulta-controlador");
                         System.out.println("Piloto " + piloto.getNome() + " consultando controlador");
@@ -546,8 +548,8 @@ public class PilotoAgent extends Agent {
                     if (reply != null) {
                         if (reply.getPerformative() == ACLMessage.CONFIRM) {
                             try {
-                                Controlador_atual = (Controlador) reply.getContentObject();
-                                Controlador = reply.getSender();
+                                controladorModel = (Controlador) reply.getContentObject();
+                                controladorAgent = reply.getSender();
 
                             } catch (UnreadableException ex) {
                                 Logger.getLogger(PilotoAgent.class.getName()).log(Level.SEVERE, null, ex);

@@ -110,16 +110,16 @@ public class CAIAJa {
         sd.setType(DescricaoServico);
         template.addServices(sd);
 
-        List<AID> aeroportos = new ArrayList<AID>();
+        List<AID> servicos = new ArrayList<AID>();
         try {
             DFAgentDescription[] result = DFService.search(agente, template);
             for (int i = 0; i < result.length; ++i) {
-                aeroportos.add(result[i].getName());
+                servicos.add(result[i].getName());
             }
         } catch (FIPAException fe) {
             fe.printStackTrace();
         }
-        return aeroportos;
+        return servicos;
     }
 
     public static void registrarServico(Agent agente, String Servico, String Nome) {
