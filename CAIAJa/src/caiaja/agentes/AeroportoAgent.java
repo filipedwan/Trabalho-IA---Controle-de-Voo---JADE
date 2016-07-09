@@ -5,6 +5,7 @@
  */
 package caiaja.agentes;
 
+import caiaja.CAIAJa;
 import caiaja.model.Abastecedor;
 import caiaja.model.Aeroporto;
 import caiaja.model.Aviao;
@@ -108,67 +109,27 @@ public class AeroportoAgent extends Agent {
                 Aviao av = new Aviao("PT-" + s1 + s2 + s3);
                 aeroporto.addAviao(av);
             }
-
-            DFAgentDescription dfd = new DFAgentDescription();
-            dfd.setName(getAID());
-            ServiceDescription sd = new ServiceDescription();
-            sd.setType("Aeroporto");
-            sd.setName(aeroporto.getPrefixo());
-            dfd.addServices(sd);
-
-            try {
-                DFService.register(this, dfd);
-            } catch (FIPAException fe) {
-                fe.printStackTrace();
-            }
+            
+            CAIAJa.registrarServico(this, "Aeroporto", aeroporto.getPrefixo());
 
 //            addBehaviour(new RequisicoesDePropostas());
             addBehaviour(new RequisicoesDePropostasControladores());
             addBehaviour(new RequisicoesDePropostasPilotos());
             addBehaviour(new RequisicoesDePropostasBombeiros());
+            
             addBehaviour(new PropostaControlar());
             addBehaviour(new PropostaPilotar());
             addBehaviour(new PropostaBombeiros());
 
             addBehaviour(new RequisicoesDePropostasAbastecedor());
             addBehaviour(new PropostaAbastecedor());
-//            addBehaviour(new ImprimeNome(this, 2000));
         }
 
     }
 
+    @Override
     protected void takeDown() {
         System.out.println("Aeroporto " + aeroporto.getNome() + " saindo de operação.");
-    }
-
-    /**
-     * Classe para responder aos requerimentos de controladores que precisem de
-     * um aeroporto pra controlar, retonar sim ou não para a requisição
-     */
-    private class RequisicoesDePropostas extends CyclicBehaviour {
-
-        public void action() {
-            MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.CFP);
-            ACLMessage msg = myAgent.receive(mt);
-            if (msg != null) {
-                // CFP Message received. Process it
-                String title = msg.getContent();
-                ACLMessage reply = msg.createReply();
-
-                if (aeroporto.getControlador() == null) {
-                    System.out.println("Aeroporto " + aeroporto.getNome() + ": Preciso de um controlador");
-                    reply.setPerformative(ACLMessage.PROPOSE);
-                    reply.setContent("Preciso de Cointrolador");
-                } else {
-                    System.out.println("Aeroporto " + aeroporto.getNome() + ": já tenho um controlador");
-                    reply.setPerformative(ACLMessage.REFUSE);
-                    reply.setContent("ja tenho um controlador");
-                }
-                myAgent.send(reply);
-            } else {
-                block();
-            }
-        }
     }
 
     /**

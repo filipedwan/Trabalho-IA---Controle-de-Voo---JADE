@@ -75,7 +75,7 @@ public class PilotoAgent extends Agent {
     }
 
     @Override
-    public void doDelete() {
+    public void takeDown() {
         if (emvoo) {
 
             int intencidade = 10 * aviao.getMotores() * (aviao.getCombustivel() + 1) * aviao.getTamanhoTanque() + 1;
@@ -96,8 +96,6 @@ public class PilotoAgent extends Agent {
             this.send(avistaincendio);
 
         }
-
-        super.doDelete(); //To change body of generated methods, choose Tools | Templates.
     }
 
     private class BuscarAtividade extends TickerBehaviour {
@@ -156,7 +154,7 @@ public class PilotoAgent extends Agent {
                     }
                 }
             } else if (aviao.getCombustivel() == 0 && emvoo) {
-                doDelete();
+                takeDown();
             }
         }
 
