@@ -58,6 +58,7 @@ public class AbastecedorAgent extends Agent {
 
         @Override
         protected void onTick() {
+            //if (aeroportoModel == null) {
             if (aeroportoAgent == null) {
                 List<AID> aeroportos = CAIAJa.getServico(myAgent, "Aeroporto");
                 addBehaviour(new AbastecedorAgent.PropoeTrabalhar(aeroportos));
