@@ -92,11 +92,20 @@ public class AeroportoAgent extends Agent {
             try {
                 int naeronaves = Integer.parseInt(numero);
                 for (int i = 0; i < naeronaves; i++) {
-                    Aviao av = new Aviao("PT-" + ((int) (Math.random() * 100)));
+
+                    char s1 = (char) (Math.random() * 26 + 65);
+                    char s2 = (char) (Math.random() * 26 + 65);
+                    char s3 = (char) (Math.random() * 26 + 65);
+
+                    Aviao av = new Aviao("PT-" + s1 + s2 + s3);
                     aeroporto.addAviao(av);
                 }
             } catch (Exception e) {
-                Aviao av = new Aviao("PT-" + ((int) (Math.random() * 100)));
+                char s1 = (char) (Math.random() * 26 + 65);
+                char s2 = (char) (Math.random() * 26 + 65);
+                char s3 = (char) (Math.random() * 26 + 65);
+
+                Aviao av = new Aviao("PT-" + s1 + s2 + s3);
                 aeroporto.addAviao(av);
             }
 
@@ -120,7 +129,7 @@ public class AeroportoAgent extends Agent {
             addBehaviour(new PropostaControlar());
             addBehaviour(new PropostaPilotar());
             addBehaviour(new PropostaBombeiros());
-            
+
             addBehaviour(new RequisicoesDePropostasAbastecedor());
             addBehaviour(new PropostaAbastecedor());
 //            addBehaviour(new ImprimeNome(this, 2000));
@@ -369,7 +378,7 @@ public class AeroportoAgent extends Agent {
                     Bombeiro bombeiro = (Bombeiro) msg.getContentObject();
 
                     aeroporto.setBombeiro(bombeiro);
-                    
+
                     reply.setPerformative(ACLMessage.INFORM);
                     reply.setContentObject(aeroporto);
                     System.out.println("Aeroporto " + aeroporto.getNome() + ": aviao para " + bombeiro.getNome());
@@ -392,7 +401,7 @@ public class AeroportoAgent extends Agent {
             }
         }
     }
-    
+
     /**
      * Classe para responder aos requerimentos de controladores que precisem de
      * um aeroporto pra controlar, retonar sim ou não para a requisição
@@ -446,12 +455,12 @@ public class AeroportoAgent extends Agent {
 //                Aviao av = aeroporto.retiraAviao(0);
 //                if (av != null) {
                 try {
-                    
+
                     Abastecedor abastecedor = (Abastecedor) msg.getContentObject();
 
                     //aeroporto.setBombeiro(bombeiro);
                     aeroporto.setAbastecedor(abastecedor);
-                    
+
                     reply.setPerformative(ACLMessage.INFORM);
                     reply.setContentObject(aeroporto);
                     System.out.println("Aeroporto " + aeroporto.getNome() + ": aviao para " + abastecedor.getNome());
@@ -473,7 +482,7 @@ public class AeroportoAgent extends Agent {
                 block();
             }
         }
-    }    
+    }
 
     private class ImprimeNome extends TickerBehaviour {
 

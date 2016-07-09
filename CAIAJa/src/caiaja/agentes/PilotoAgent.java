@@ -16,29 +16,17 @@ import caiaja.ontologia.CAIAJaOntologia;
 import caiaja.ontologia.acoes.Decolar;
 import caiaja.ontologia.acoes.Pousar;
 import jade.content.lang.sl.SLCodec;
-import jade.content.onto.Ontology;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
-import jade.core.behaviours.OneShotBehaviour;
-import jade.core.behaviours.SequentialBehaviour;
 import jade.core.behaviours.TickerBehaviour;
-import jade.core.behaviours.WakerBehaviour;
-import jade.domain.DFService;
-import jade.domain.FIPAAgentManagement.DFAgentDescription;
-import jade.domain.FIPAAgentManagement.ServiceDescription;
-import jade.domain.FIPAException;
 import jade.domain.FIPANames;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.lang.acl.UnreadableException;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -600,7 +588,7 @@ public class PilotoAgent extends Agent {
 
         @Override
         public void action() {
-            System.out.println(piloto.getNome() + ": Decolar " + estado);
+//            System.out.println(piloto.getNome() + ": Decolar " + estado);
             switch (estado) {
                 case 0: {
                     ACLMessage proposta = new ACLMessage(ACLMessage.PROPOSE);
@@ -684,12 +672,10 @@ public class PilotoAgent extends Agent {
                      * Decolagem aprovada, aguardando clearance para decolagem
                      */
                     ACLMessage reply = myAgent.receive(mt);
-//                    System.err.println(piloto.getNome() + ": Aguardando");
                     if (reply != null) {
-                        System.err.println(piloto.getNome() + ": replay " + reply);
                         if (reply.getPerformative() == ACLMessage.CONFIRM) {
                             aeroportoAgent = reply.getSender();
-                            System.out.println(piloto.getNome() + ": decolando " + aviao.getPrefixo());
+                            System.out.println(piloto.getNome() + ": Decolando " + aviao.getPrefixo());
                             aviao.setAceleracaoMotor(1f);
                             estado = 4;
                         } else if (reply.getPerformative() == ACLMessage.CANCEL) {
@@ -700,7 +686,7 @@ public class PilotoAgent extends Agent {
                             System.out.println(piloto.getNome() + ": Aguardando confirmação do controlador " + controladorModel.getNome() + "");
                         }
                     } else {
-                        block(100);
+                        block();
                     }
                     break;
                 }
