@@ -5,6 +5,7 @@
  */
 package caiaja.agentes;
 
+import caiaja.model.Abastecedor;
 import caiaja.model.Aeroporto;
 import caiaja.model.Aviao;
 import caiaja.model.Bombeiro;
@@ -119,6 +120,9 @@ public class AeroportoAgent extends Agent {
             addBehaviour(new PropostaControlar());
             addBehaviour(new PropostaPilotar());
             addBehaviour(new PropostaBombeiros());
+            
+            addBehaviour(new RequisicoesDePropostasAbastecedor());
+            addBehaviour(new PropostaAbastecedor());
 //            addBehaviour(new ImprimeNome(this, 2000));
         }
 
@@ -388,6 +392,88 @@ public class AeroportoAgent extends Agent {
             }
         }
     }
+    
+    /**
+     * Classe para responder aos requerimentos de controladores que precisem de
+     * um aeroporto pra controlar, retonar sim ou não para a requisição
+     */
+    private class RequisicoesDePropostasAbastecedor extends CyclicBehaviour {
+
+        public void action() {
+            MessageTemplate mt = MessageTemplate.and(
+                    MessageTemplate.MatchPerformative(ACLMessage.CFP),
+                    MessageTemplate.MatchConversationId("proposta-abastecedor")
+            );
+
+            ACLMessage msg = myAgent.receive(mt);
+            if (msg != null) {
+                String title = msg.getContent();
+                ACLMessage reply = msg.createReply();
+
+                if (aeroporto.getQuantidadeAvioes() > 0) {
+                    System.out.println("Aeroporto " + aeroporto.getNome() + ": tenho vaga");
+                    reply.setPerformative(ACLMessage.PROPOSE);
+                    reply.setContent("Tenho vaga");
+                    try {
+                        reply.setContentObject(aeroporto);
+                    } catch (IOException ex) {
+                        Logger.getLogger(AeroportoAgent.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                } else {
+                    System.out.println("Aeroporto " + aeroporto.getNome() + ": não tenho vagas diposníveis");
+                    reply.setPerformative(ACLMessage.REFUSE);
+                    reply.setContent("Sem vagas");
+                }
+                myAgent.send(reply);
+            } else {
+                block();
+            }
+        }
+    }
+
+    private class PropostaAbastecedor extends CyclicBehaviour {
+
+        public void action() {
+            MessageTemplate mt = MessageTemplate.and(
+                    MessageTemplate.MatchPerformative(ACLMessage.ACCEPT_PROPOSAL),
+                    MessageTemplate.MatchConversationId("proposta-abastecedor")
+            );
+            ACLMessage msg = myAgent.receive(mt);
+            if (msg != null) {
+                String title = msg.getContent();
+                ACLMessage reply = msg.createReply();
+
+//                Aviao av = aeroporto.retiraAviao(0);
+//                if (av != null) {
+                try {
+                    
+                    Abastecedor abastecedor = (Abastecedor) msg.getContentObject();
+
+                    //aeroporto.setBombeiro(bombeiro);
+                    aeroporto.setAbastecedor(abastecedor);
+                    
+                    reply.setPerformative(ACLMessage.INFORM);
+                    reply.setContentObject(aeroporto);
+                    System.out.println("Aeroporto " + aeroporto.getNome() + ": aviao para " + abastecedor.getNome());
+
+                } catch (UnreadableException ex) {
+                    System.out.println("Aeroporto " + aeroporto.getNome() + ": erro na msg");
+                    reply.setPerformative(ACLMessage.FAILURE);
+                    reply.setContent("error-msg");
+                } catch (IOException ex) {
+                    Logger.getLogger(AeroportoAgent.class.getName()).log(Level.SEVERE, null, ex);
+                }
+//                } else {
+//                    System.out.println("Aeroporto " + aeroporto.getNome() + ": pegaram o aviao neste tempo");
+//                    reply.setPerformative(ACLMessage.FAILURE);
+//                    reply.setContent("not-available");
+//                }
+                myAgent.send(reply);
+            } else {
+                block();
+            }
+        }
+    }    
 
     private class ImprimeNome extends TickerBehaviour {
 

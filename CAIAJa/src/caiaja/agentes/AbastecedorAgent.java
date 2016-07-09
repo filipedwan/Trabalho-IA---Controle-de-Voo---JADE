@@ -32,6 +32,12 @@ public class AbastecedorAgent extends Agent {
     @Override
     protected void setup() {
         Object[] args = getArguments();
+        abastecedorModel = new Abastecedor();
+        ativo = false;
+        aeroportoAgent = null;
+        controladorAgent = null;
+        pilotoAtualAgent = null;
+        aeroportoModel = null;
         if (args != null) {
             if (args.length > 0) {
                 //executar classe privada aguardaPedidoDeAbastecimento
@@ -58,8 +64,8 @@ public class AbastecedorAgent extends Agent {
 
         @Override
         protected void onTick() {
-            //if (aeroportoModel == null) {
-            if (aeroportoAgent == null) {
+            if (aeroportoModel == null) {
+            //if (aeroportoAgent == null) {
                 List<AID> aeroportos = CAIAJa.getServico(myAgent, "Aeroporto");
                 addBehaviour(new AbastecedorAgent.PropoeTrabalhar(aeroportos));
             } else {

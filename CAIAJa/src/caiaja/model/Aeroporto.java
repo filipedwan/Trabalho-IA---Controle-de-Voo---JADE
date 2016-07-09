@@ -24,6 +24,7 @@ public class Aeroporto implements Serializable, Concept {
     EstacaoMeteorologica estacaoMeteorologica;
     Controlador controlador;
     Bombeiro bombeiro;
+    Abastecedor abastecedor;
     List<Aviao> avioes;
 
     public Aeroporto() {
@@ -141,6 +142,10 @@ public class Aeroporto implements Serializable, Concept {
             return false;
         }
         return true;
+    }
+
+    public void setAbastecedor(Abastecedor abastecedor) {
+        this.abastecedor = abastecedor;
     }
 
 }

@@ -54,6 +54,7 @@ public class CAIAJa {
         List<String> Pilotos = new ArrayList<>();
         List<String> Controladores = new ArrayList<>();
         List<String> Bombeiros = new ArrayList<>();
+        List<String> abastecedores = new ArrayList<>();
 
         Pilotos.add("Fernando");
         Pilotos.add("Filipe");
@@ -62,6 +63,8 @@ public class CAIAJa {
         Controladores.add("Jose");
 
         Bombeiros.add("Carlos");
+
+        abastecedores.add("Ville");
 
         /**
          * Inicializando Agentes
@@ -82,6 +85,11 @@ public class CAIAJa {
 
             for (String bombeiro : Bombeiros) {
                 AgentController Bombeiros1 = ac.createNewAgent("b_" + bombeiro, "caiaja.agentes.BombeiroAgent", new String[]{bombeiro});
+                Agentes.add(Bombeiros1);
+            }
+
+            for (String abastacedor : abastecedores) {
+                AgentController Bombeiros1 = ac.createNewAgent("a_" + abastacedor, "caiaja.agentes.AbastecedorAgent", new String[]{abastacedor});
                 Agentes.add(Bombeiros1);
             }
 
