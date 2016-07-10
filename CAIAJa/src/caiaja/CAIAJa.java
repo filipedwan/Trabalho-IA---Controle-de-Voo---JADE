@@ -63,7 +63,11 @@ public class CAIAJa {
         Pilotos.add("Dion");
         Pilotos.add("Walter");
         Pilotos.add("Jonathas");
-
+        
+//        Pilotos.add("Gustavo");
+//        Pilotos.add("Mhayk");
+//        Pilotos.add("Manoel");
+        
         Controladores.add("Jose");
         Controladores.add("Thais");
 
@@ -108,7 +112,7 @@ public class CAIAJa {
         }
 
         try {
-            Thread.sleep(1000);
+            Thread.sleep(10000);
         } catch (InterruptedException ex) {
             Logger.getLogger(CAIAJa.class.getName()).log(Level.SEVERE, null, ex);
         }

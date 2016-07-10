@@ -96,6 +96,7 @@ public class ControladorAgent extends Agent {
                 addBehaviour(new RecebeSucessoPouso());
 
                 addBehaviour(new RecebeAlertaAcidente());
+                addBehaviour(new RecebeIncendioExtinto());
 
                 addBehaviour(new ProcessaFilaDePousoEDecolagem(this));
             }
@@ -415,16 +416,22 @@ public class ControladorAgent extends Agent {
                     Logger.getLogger(ControladorAgent.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 if (conteudo != null) {
-                    if (!fila_pilotos_pousar.isEmpty()) {
+                    if (ancidente) {
+                        System.out.println("Controlador " + controlador_modelo.getNome() + ":  " + conteudo.getPiloto().getNome() + " Aeroporto fechado, Acidente na pista");
 
-                        System.out.println("Controlador " + controlador_modelo.getNome() + ":  " + conteudo.getPiloto().getNome() + " pedido rejeitado outra aeronave estão pousando");
+                        reply.setContent("negado acidente");
+
+                        reply.setPerformative(ACLMessage.REJECT_PROPOSAL);
+                    } else if (!fila_pilotos_pousar.isEmpty()) {
+
+                        System.out.println("Controlador " + controlador_modelo.getNome() + ":  " + conteudo.getPiloto().getNome() + " pedido rejeitado outra aeronave esta pousando");
 
                         reply.setContent("negado aguarde");
 
                         reply.setPerformative(ACLMessage.REJECT_PROPOSAL);
                     } else if (!fila_pilotos_decolar.isEmpty()) {
 
-                        System.out.println("Controlador " + controlador_modelo.getNome() + ":  " + conteudo.getPiloto().getNome() + " aguarde outra aeronave estão decolando");
+                        System.out.println("Controlador " + controlador_modelo.getNome() + ":  " + conteudo.getPiloto().getNome() + " aguarde outra aeronave aeronave decolando");
 
                         reply.setContent("aguarde");
 
@@ -597,7 +604,14 @@ public class ControladorAgent extends Agent {
                     Logger.getLogger(ControladorAgent.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 if (conteudo != null) {
-                    if (!fila_pilotos_pousar.isEmpty()) {
+
+                    if (ancidente) {
+                        System.out.println("Controlador " + controlador_modelo.getNome() + ":  " + conteudo.getPiloto().getNome() + " Aeroporto fechado, Acidente na pista");
+
+                        reply.setContent("negado acidente");
+
+                        reply.setPerformative(ACLMessage.REJECT_PROPOSAL);
+                    } else if (!fila_pilotos_pousar.isEmpty()) {
 
                         System.out.println("Controlador " + controlador_modelo.getNome() + ":  " + conteudo.getPiloto().getNome() + " pedido rejeitado outra aeronave esta pousando");
 
@@ -653,7 +667,7 @@ public class ControladorAgent extends Agent {
                     Logger.getLogger(ControladorAgent.class.getName()).log(Level.SEVERE, null, ex);
                 }
 
-                if (!pistaOcupada) {
+                if (!pistaOcupada && !ancidente) {
                     pistaOcupada = true;
                     reply.setPerformative(ACLMessage.CONFIRM);
                     System.out.println(controlador_modelo.getNome() + ": Pode decolar " + conteudo.getAviao().getPrefixo());
@@ -710,8 +724,22 @@ public class ControladorAgent extends Agent {
 
         @Override
         public void action() {
-            if (!fila_pilotos_pousar.isEmpty() && !pistaOcupada) {
-                pistaOcupada = true;
+//            System.err.println("Fila de Pousos e decolagens\n"
+//                    + "ancidente(" + ancidente + ")\n"
+//                    + "fila_pilotos_pousar.isEmpty(" + fila_pilotos_pousar.isEmpty() + ")\n"
+//                    + "fila_pilotos_decolar.isEmpty(" + fila_pilotos_decolar.isEmpty() + ")");
+            if (ancidente) {
+                Pousar pouso = fila_pilotos_pousar.remove(0);
+
+                System.out.println("Controlador " + controlador_modelo.getNome() + ": Aeroporto fechado por acidente!");
+
+                ACLMessage confirmaLiberacao = new ACLMessage(ACLMessage.DISCONFIRM);
+                confirmaLiberacao.addReceiver(pouso.getActor());
+                confirmaLiberacao.setConversationId("liberacao-piloto-pouso");
+                confirmaLiberacao.setInReplyTo(pouso.getReplyWith());
+
+                myAgent.send(confirmaLiberacao);
+            } else if (!fila_pilotos_pousar.isEmpty() && !pistaOcupada) {
                 Pousar pouso = fila_pilotos_pousar.remove(0);
                 System.out.println("Controlador " + controlador_modelo.getNome() + ": Chamar para pouso " + pouso.getAviao().getPrefixo());
 
@@ -719,8 +747,36 @@ public class ControladorAgent extends Agent {
                 confirmaLiberacao.addReceiver(pouso.getActor());
                 confirmaLiberacao.setConversationId("liberacao-piloto-pouso");
                 confirmaLiberacao.setInReplyTo(pouso.getReplyWith());
+                confirmaLiberacao.setReplyWith("pouso" + System.currentTimeMillis());
 
                 myAgent.send(confirmaLiberacao);
+
+                MessageTemplate mt1 = MessageTemplate.MatchConversationId("confirma-liberacao-piloto");
+                MessageTemplate mt2 = MessageTemplate.MatchInReplyTo(confirmaLiberacao.getReplyWith());
+                MessageTemplate mt = MessageTemplate.and(mt1, mt2);
+
+                ACLMessage reply = myAgent.receive(mt);
+
+                int count = 0;
+                while (reply == null && count < 10) {
+                    block(100);
+                    reply = myAgent.receive(mt);
+                    count++;
+                }
+                if (reply != null) {
+                    if (reply.getPerformative() == ACLMessage.INFORM) {
+                        pistaOcupada = true;
+                    }
+                } else {
+                    ACLMessage cancelarLiberacao = new ACLMessage(ACLMessage.CANCEL);
+                    cancelarLiberacao.addReceiver(pouso.getActor());
+                    cancelarLiberacao.setConversationId("liberacao-piloto-pouso");
+                    cancelarLiberacao.setInReplyTo(pouso.getReplyWith());
+                    cancelarLiberacao.setReplyWith("pouso" + System.currentTimeMillis());
+
+                    myAgent.send(cancelarLiberacao);
+                }
+
             } else if (!fila_pilotos_decolar.isEmpty() && !pistaOcupada) {
                 pistaOcupada = true;
                 Decolar decolagem = fila_pilotos_decolar.remove(0);
@@ -872,6 +928,27 @@ public class ControladorAgent extends Agent {
                 Logger.getLogger(ControladorAgent.class.getName()).log(Level.SEVERE, null, ex);
             } catch (IOException ex) {
                 Logger.getLogger(ControladorAgent.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+        }
+    }
+
+    private class RecebeIncendioExtinto extends CyclicBehaviour {
+
+        public void action() {
+            if (ancidente) {
+                MessageTemplate mt = MessageTemplate.and(
+                        MessageTemplate.MatchPerformative(ACLMessage.INFORM),
+                        MessageTemplate.MatchConversationId("incendio-extinto")
+                );
+                ACLMessage msg = myAgent.receive(mt);
+                if (msg != null) {
+                    ancidente = false;
+                } else {
+                    block();
+                }
+            } else {
+                block();
             }
 
         }
