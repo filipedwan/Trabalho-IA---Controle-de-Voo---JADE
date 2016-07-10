@@ -16,7 +16,7 @@ public class Incendio implements Serializable, Concept {
     }
 
     public int combateIncendio() {
-        intencidade--;
+        intencidade -= 10;
         return intencidade;
     }
 

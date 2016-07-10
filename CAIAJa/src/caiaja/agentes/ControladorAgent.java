@@ -50,6 +50,7 @@ public class ControladorAgent extends Agent {
 
     boolean pistaOcupada;
     boolean buscandoAeroporto;
+    boolean ancidente;
 
     AID aeroporto;
     List<Aviao> Avioes;
@@ -67,6 +68,7 @@ public class ControladorAgent extends Agent {
         controlador_modelo = new Controlador();
         aeroporto = null;
         buscandoAeroporto = false;
+        ancidente = false;
         if (args != null) {
             if (args.length > 0) {
                 controlador_modelo.setNome((String) args[0]);
@@ -166,7 +168,7 @@ public class ControladorAgent extends Agent {
                     ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
 
                     for (AID aerosporto : aeroportos) {
-                        System.out.println(controlador_modelo.getNome() + " --> " + aerosporto.getLocalName()+ ": Posso controlar?");
+                        System.out.println(controlador_modelo.getNome() + " --> " + aerosporto.getLocalName() + ": Posso controlar?");
                         cfp.addReceiver(aerosporto);
                     }
                     cfp.setConversationId("proposta-controlador");
@@ -709,7 +711,7 @@ public class ControladorAgent extends Agent {
         @Override
         public void action() {
             if (!fila_pilotos_pousar.isEmpty() && !pistaOcupada) {
-                pistaOcupada= true;
+                pistaOcupada = true;
                 Pousar pouso = fila_pilotos_pousar.remove(0);
                 System.out.println("Controlador " + controlador_modelo.getNome() + ": Chamar para pouso " + pouso.getAviao().getPrefixo());
 
@@ -720,7 +722,7 @@ public class ControladorAgent extends Agent {
 
                 myAgent.send(confirmaLiberacao);
             } else if (!fila_pilotos_decolar.isEmpty() && !pistaOcupada) {
-                pistaOcupada= true;
+                pistaOcupada = true;
                 Decolar decolagem = fila_pilotos_decolar.remove(0);
                 System.out.println("Controlador " + controlador_modelo.getNome() + ": Chamar para decolagem " + decolagem.getAviao().getPrefixo());
 
@@ -792,36 +794,86 @@ public class ControladorAgent extends Agent {
             MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.PROPAGATE);
             ACLMessage msg = myAgent.receive(mt);
             if (msg != null) {
-
-                ACLMessage reply = msg.createReply();
-
                 Object obj = null;
 
                 try {
                     obj = msg.getContentObject();
 
                     if (obj.getClass() == Incendio.class) {
-                        Incendio incendio = (Incendio) obj;
-                        System.out.println(controlador_modelo.getNome() + ": Alerta bombeiros  " + msg.getSender().getLocalName());
-                        try {
-                            reply.setContentObject(incendio);
-                        } catch (IOException ex) {
-                            Logger.getLogger(ControladorAgent.class.getName()).log(Level.SEVERE, null, ex);
+
+                        if (aeroporto_modelo.getBombeiro() == null) {
+                            addBehaviour(new AtualizaDadosAeroporto());
                         }
-                        reply.setPerformative(ACLMessage.INFORM);
 
-                        reply.setConversationId("Incendio");
-                        myAgent.send(reply);
+                        if (aeroporto_modelo.getBombeiro() != null) {
+                            ACLMessage alertaBombeiros = new ACLMessage(ACLMessage.INFORM);
+                            Incendio incendio = (Incendio) obj;
+                            System.out.println(controlador_modelo.getNome() + ": Alerta bombeiro " + aeroporto_modelo.getBombeiro().getNome());
+                            try {
+                                alertaBombeiros.setContentObject(incendio);
+                            } catch (IOException ex) {
+                                Logger.getLogger(ControladorAgent.class.getName()).log(Level.SEVERE, null, ex);
+                            }
 
+                            List<AID> bombeiros = CAIAJa.getAgent(myAgent, aeroporto_modelo.getBombeiro().getNome(), "Bombeiro");
+
+                            for (AID bombeiro : bombeiros) {
+                                alertaBombeiros.addReceiver(bombeiro);
+                            }
+
+                            alertaBombeiros.setConversationId("Incendio");
+                            myAgent.send(alertaBombeiros);
+
+                            ancidente = true;
+                        }
                     }
 
                 } catch (UnreadableException ex) {
-                    reply.setPerformative(ACLMessage.FAILURE);
                 }
 
             } else {
                 block();
             }
+        }
+    }
+
+    /**
+     * Classe para responder aos requerimentos de pilotos que precisem de um
+     * saber quem é o controlador_modelo
+     */
+    private class AtualizaDadosAeroporto extends OneShotBehaviour {
+
+        public void action() {
+            ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
+
+            try {
+                msg.setConversationId("atualiza-controlador-aeroporto");
+                msg.setContentObject(controlador_modelo);
+
+                msg.setReplyWith("atualiza" + System.currentTimeMillis());
+                msg.addReceiver(aeroporto);
+                myAgent.send(msg);
+
+                MessageTemplate mt1 = MessageTemplate.MatchConversationId("atualiza-controlador-aeroporto");
+                MessageTemplate mt2 = MessageTemplate.MatchInReplyTo(msg.getReplyWith());
+                MessageTemplate mt = MessageTemplate.and(mt1, mt2);
+
+                ACLMessage reply = myAgent.receive(mt);
+
+                while (reply == null) {
+                    block();
+                    reply = myAgent.receive(mt);
+                }
+
+                if (reply.getPerformative() == ACLMessage.INFORM) {
+                    aeroporto_modelo = (Aeroporto) reply.getContentObject();
+                }
+            } catch (UnreadableException ex) {
+                Logger.getLogger(ControladorAgent.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IOException ex) {
+                Logger.getLogger(ControladorAgent.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
         }
     }
 

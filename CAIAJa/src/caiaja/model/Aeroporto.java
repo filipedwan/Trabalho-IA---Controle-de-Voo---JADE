@@ -118,6 +118,19 @@ public class Aeroporto implements Serializable, Concept {
         this.bombeiro = bombeiro;
     }
 
+    public Abastecedor getAbastecedor() {
+        return abastecedor;
+    }
+
+    public void setAbastecedor(Abastecedor abastecedor) {
+        this.abastecedor = abastecedor;
+    }
+
+    @Override
+    public String toString() {
+        return "Aeroporto{" + Nome + '}';
+    }
+
     @Override
     public int hashCode() {
         int hash = 7;
@@ -142,10 +155,6 @@ public class Aeroporto implements Serializable, Concept {
             return false;
         }
         return true;
-    }
-
-    public void setAbastecedor(Abastecedor abastecedor) {
-        this.abastecedor = abastecedor;
     }
 
 }

@@ -69,6 +69,7 @@ public class PilotoAgent extends Agent {
                 addBehaviour(new PilotoAgent.BuscarAtividade(this, 5000));
 
                 addBehaviour(new PilotoAgent.RequisicoesDePropostas());
+                addBehaviour(new PilotoAgent.CondicaoDeVoo());
 
             }
         }
@@ -78,9 +79,9 @@ public class PilotoAgent extends Agent {
     public void takeDown() {
         if (emvoo) {
 
-            int intencidade = 10 * aviao.getMotores() * (aviao.getCombustivel() + 1) * aviao.getTamanhoTanque() + 1;
+            int intencidade = aviao.getMotores() * (aviao.getCombustivel() + 1) * aviao.getTamanhoTanque() + 1;
 
-            System.out.println("Acidente com " + aviao.getPrefixo() + ": Anunciando incendio (" + intencidade + ") em " + aeroportoModel.getNome());
+            System.err.println("Acidente com " + aviao.getPrefixo() + ": Anunciando incendio (" + intencidade + ") em " + aeroportoModel.getNome());
 
             Incendio incendio_modelo = new Incendio(intencidade);
 
@@ -127,7 +128,7 @@ public class PilotoAgent extends Agent {
                     myAgent.addBehaviour(new ConsultarControlador(myAgent));
 
                 } else if (emvoo) {
-                    aviao.setAceleracaoMotor(0.3f);
+                    aviao.setAceleracaoMotor(0.8f);
 //                        System.out.println(piloto.getNome() + ": Em voo com " + aviao.getPrefixo());
 
                     if (aviao.getNilveCombustivel() < 0.3f) {
@@ -153,9 +154,11 @@ public class PilotoAgent extends Agent {
                         myAgent.addBehaviour(new PilotoAgent.RequisicaoAbastecer(myAgent, abastecedores));
                     }
                 }
-            } else if (aviao.getCombustivel() == 0 && emvoo) {
-                takeDown();
             }
+
+//            if (aviao.getCombustivel() == 0 && emvoo) {
+//                doDelete();
+//            }
         }
 
     }
@@ -299,7 +302,7 @@ public class PilotoAgent extends Agent {
                     ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
 
                     for (AID aeroporto : lista_aeroportos) {
-                        System.out.println(piloto.getNome() + " --> " + aeroporto.getLocalName()+": quero uma aeronave pra pilotar");
+                        System.out.println(piloto.getNome() + " --> " + aeroporto.getLocalName() + ": quero uma aeronave pra pilotar");
                         cfp.addReceiver(aeroporto);
                     }
                     cfp.setConversationId("proposta-piloto");
@@ -856,6 +859,23 @@ public class PilotoAgent extends Agent {
                 ACLMessage reply = msg.createReply();
 
                 myAgent.send(reply);
+            } else {
+                block();
+            }
+        }
+    }
+
+    /**
+     * Classe para responder aos requerimentos de controladores que precisem de
+     * um aeroporto pra controlar, retonar sim ou não para a requisição
+     */
+    private class CondicaoDeVoo extends CyclicBehaviour {
+
+        public void action() {
+            if (aviao != null) {
+                if (emvoo && !emAcao && aviao.getCombustivel() == 0) {
+                    doDelete();
+                }
             } else {
                 block();
             }

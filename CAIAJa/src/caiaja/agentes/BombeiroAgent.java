@@ -234,7 +234,7 @@ public class BombeiroAgent extends Agent {
 
         public void action() {
             MessageTemplate mt1 = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
-            MessageTemplate mt2 = MessageTemplate.MatchContent("Incendio");
+            MessageTemplate mt2 = MessageTemplate.MatchConversationId("Incendio");
             MessageTemplate mt = MessageTemplate.and(mt1, mt2);
             ACLMessage msg = myAgent.receive(mt);
             if (msg != null) {
@@ -288,7 +288,7 @@ public class BombeiroAgent extends Agent {
                 myAgent.lista_incendio_modelo.remove(0);
 
                 while (incendio_modelo.combateIncendio() > 0) {
-                    System.err.println("Combatendo o incendio (" + myAgent.lista_incendio_modelo.size() + ")");
+                    System.err.println("Combatendo o incendio (" + myAgent.lista_incendio_modelo.size() + ")");                    
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException ex) {

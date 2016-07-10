@@ -59,7 +59,7 @@ public class CAIAJa {
         Pilotos.add("Fernando");
         Pilotos.add("Filipe");
         Pilotos.add("Marcelo");
-        
+
         Pilotos.add("Dion");
         Pilotos.add("Walter");
         Pilotos.add("Jonathas");
@@ -80,7 +80,7 @@ public class CAIAJa {
 
             AgentController AeroportoBVB = ac.createNewAgent("BVB", "caiaja.agentes.AeroportoAgent", new String[]{"", "BVB", "Atlas Brasil Catanhete", "2700"});
             AeroportoBVB.start();
-            
+
             AgentController AeroportoMAO = ac.createNewAgent("MAO", "caiaja.agentes.AeroportoAgent", new String[]{"", "MAO", "Eduardo Gomes", "8858"});
             AeroportoMAO.start();
 
@@ -120,6 +120,33 @@ public class CAIAJa {
                 Logger.getLogger(CAIAJa.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+    }
+
+    public static List<AID> getAgent(Agent agente, String nomeAgente, String tipoServico) {
+        DFAgentDescription template = new DFAgentDescription();
+
+        if (tipoServico != "") {
+            ServiceDescription sd = new ServiceDescription();
+            sd.setType(tipoServico);
+            template.addServices(sd);
+        }
+
+        List<AID> agentes = new ArrayList<AID>();
+        try {
+            DFAgentDescription[] result = DFService.search(agente, template);
+            for (int i = 0; i < result.length; ++i) {
+                if (result[i].getName().getLocalName().equals(nomeAgente)) {
+                    agentes.add(result[i].getName());
+                }
+            }
+        } catch (FIPAException fe) {
+            fe.printStackTrace();
+        }
+        return agentes;
+    }
+
+    public static List<AID> getAgent(Agent agente, String nomeAgente) {
+        return getAgent(agente, nomeAgente, "");
     }
 
     public static List<AID> getServico(Agent agente, String DescricaoServico) {
