@@ -45,6 +45,7 @@ public class ControladorAgent extends Agent {
 
     List<Pousar> fila_pilotos_pousar;
     List<Decolar> fila_pilotos_decolar;
+    List<AID> fila_propor_reabastecimento;
 
     boolean pistaOcupada;
 
@@ -55,6 +56,7 @@ public class ControladorAgent extends Agent {
         Avioes = new ArrayList<Aviao>();
         fila_pilotos_pousar = new ArrayList<Pousar>();
         fila_pilotos_decolar = new ArrayList<Decolar>();
+        fila_propor_reabastecimento = new ArrayList<AID>();
     }
 
     protected void setup() {
@@ -89,24 +91,9 @@ public class ControladorAgent extends Agent {
 
                 addBehaviour(new BuscarEmprego(this, 2000));
 
-//                addBehaviour(new RecebePropostaDecolar());
-//                addBehaviour(new VerificaOntologia(this, 5000));
                 addBehaviour(new Contato());
                 addBehaviour(new RecebePilotoConsultaControlador());
 
-                // Create and add the behaviour for handling QUERIES using the employment-ontology
-//                addBehaviour(new TratarControladorConsultasBehaviour(this));
-                // Create and add the behaviour for handling REQUESTS using the employment-ontology
-//                MessageTemplate mt = MessageTemplate.and(
-//                        MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST),
-//                        MessageTemplate.MatchOntology(CAIAJaOntologia.NAME));
-//                TratarControladorConsultasBehaviour b = new TratarControladorConsultasBehaviour(this);
-//                TrataRequisicoesDecolar c = new TrataRequisicoesDecolar(this);
-//
-//                addBehaviour(b);
-//                addBehaviour(c);
-                //Verificando propostas de pouso dos pilotos
-//                tratarPropostasDePouso();
                 addBehaviour(new RecebeLiberacaoDecolar());
                 addBehaviour(new TratarPropostaDecolar());
                 addBehaviour(new RecebeSucessoDecolagem());
@@ -115,8 +102,9 @@ public class ControladorAgent extends Agent {
                 addBehaviour(new RecebeLiberacaoPousar());
                 addBehaviour(new RecebeSucessoPouso());
 
-                addBehaviour(new ProcessaFilaDePousoEDecolagem(this));
+                addBehaviour(new RecebeAlertaAcidente());
 
+                addBehaviour(new ProcessaFilaDePousoEDecolagem(this));
             }
         }
     }
@@ -384,9 +372,7 @@ public class ControladorAgent extends Agent {
             } else {
                 block();
             }
-
         }
-
     }
 
     /**
@@ -544,8 +530,8 @@ public class ControladorAgent extends Agent {
                 MessageTemplate mt2 = MessageTemplate.MatchConversationId(reply.getConversationId());
                 MessageTemplate mt0 = MessageTemplate.and(mt1, mt2);
 
-                addBehaviour(new RecebeRequisicaoAbastecer(msg.getSender(), mt0));
-
+                fila_propor_reabastecimento.add(msg.getSender());
+//                addBehaviour(new RecebeRequisicaoAbastecer(msg.getSender(), mt0));
             } else {
                 block();
             }
@@ -555,42 +541,45 @@ public class ControladorAgent extends Agent {
     /**
      * Classe para responder ao sucesso do piloto
      */
-    private class RecebeRequisicaoAbastecer extends OneShotBehaviour {
-
-        MessageTemplate mt;
-        AID abastecer;
-
-        public RecebeRequisicaoAbastecer(AID abastecer, MessageTemplate mt) {
-            this.abastecer = abastecer;
-            this.mt = mt;
-        }
+    private class PropoeReabastecimentoDepoisDoPouso extends CyclicBehaviour {
 
         @Override
         public void action() {
 
-            ACLMessage msg = myAgent.receive(mt);
+            if (fila_propor_reabastecimento.size() > 0) {
+                AID piloto = fila_propor_reabastecimento.remove(0);
 
-            while (msg == null) {
-                msg = myAgent.receive(mt);
-                block(100);
-            }
+                ACLMessage propoeReabastecer = new ACLMessage(ACLMessage.PROPOSE);
+                propoeReabastecer.setConversationId("propor-abastecer-piloto");
+                propoeReabastecer.setContent("Precisa abastecer?");
+                System.out.println(controlador_modelo.getNome() + ": precisa reabastecer " + piloto.getLocalName() + "?");
 
-            if (msg.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
+                myAgent.send(propoeReabastecer);
 
-                ACLMessage informaAbastecedor = new ACLMessage(ACLMessage.INFORM);
+                MessageTemplate mt1 = MessageTemplate.MatchReplyWith(propoeReabastecer.getReplyWith());
+                MessageTemplate mt2 = MessageTemplate.MatchConversationId(propoeReabastecer.getConversationId());
+                MessageTemplate mt = MessageTemplate.and(mt1, mt2);
 
-//                informaAbastecedor.set
-                try {
-                    msg.setContentObject(abastecer);
-                } catch (IOException ex) {
-                    Logger.getLogger(ControladorAgent.class.getName()).log(Level.SEVERE, null, ex);
+                ACLMessage msg = myAgent.receive(mt);
+
+                int i = 0;
+                while (msg == null && i < 100) {
+                    msg = myAgent.receive(mt);
+                    block(100);
+                    i++;
                 }
 
-                System.out.println(controlador_modelo.getNome() + ": informa " + " reabastecer " + abastecer.getLocalName() + "?");
+                if (msg.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
 
-                myAgent.send(msg);
+                    ACLMessage informaAbastecedor = new ACLMessage(ACLMessage.INFORM);
+
+                    System.out.println(controlador_modelo.getNome() + ": informa " + " reabastecer " + piloto.getLocalName() + "?");
+
+                    myAgent.send(msg);
+                }
+
             }
-
+            block();
         }
     }
 
