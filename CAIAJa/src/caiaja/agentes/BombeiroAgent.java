@@ -110,13 +110,13 @@ public class BombeiroAgent extends Agent {
 
         @Override
         public void action() {
-            System.out.println("Bombeiro " + bombeiro_modelo.getNome() + ": Trabalho bombeiro " + estado);
+//            System.out.println("Bombeiro " + bombeiro_modelo.getNome() + ": Trabalho bombeiro " + estado);
             switch (estado) {
                 case 0: {
                     ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
 
                     for (AID aeroporto : aeroportos) {
-                        System.out.println("Bombeiro " + bombeiro_modelo.getNome() + " --> " + aeroporto.getName());
+                        System.out.println("Bombeiro " + bombeiro_modelo.getNome() + " --> " + aeroporto.getLocalName()+": Quero trabalhar");
                         cfp.addReceiver(aeroporto);
                     }
                     cfp.setConversationId("proposta-bombeiro");
@@ -164,7 +164,7 @@ public class BombeiroAgent extends Agent {
                     msg.setConversationId("proposta-bombeiro");
                     msg.setReplyWith("trabalhar" + System.currentTimeMillis());
                     myAgent.send(msg);
-                    System.out.println("Bombeiro " + bombeiro_modelo.getNome() + " --> " + Escolhido.getName() + ": Aceito Trabalhar");
+                    System.out.println("Bombeiro " + bombeiro_modelo.getNome() + " --> " + Escolhido.getLocalName()+ ": Aceito Trabalhar");
 
                     mt = MessageTemplate.and(MessageTemplate.MatchConversationId("proposta-bombeiro"),
                             MessageTemplate.MatchInReplyTo(msg.getReplyWith()));
@@ -179,7 +179,7 @@ public class BombeiroAgent extends Agent {
                             System.out.println("Bombeiro " + bombeiro_modelo.getNome() + ": trabalhando para o  " + aeroporto_agente.getLocalName());
 
                         } else {
-                            System.out.println("Bombeiro " + bombeiro_modelo.getNome() + ": não foi contratado por " + Escolhido.getName() + " já conseguiu outro bombeiro");
+                            System.out.println("Bombeiro " + bombeiro_modelo.getNome() + ": não foi contratado por " + Escolhido.getLocalName()+ " já conseguiu outro bombeiro");
                         }
 
                         estado = 4;

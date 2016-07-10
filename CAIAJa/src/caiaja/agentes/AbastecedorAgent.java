@@ -95,7 +95,7 @@ public class AbastecedorAgent extends Agent {
                     ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
 
                     for (AID aeroporto : aeroportos) {
-                        System.out.println("Abastecedor " + abastecedorModel.getNome() + " --> " + aeroporto.getName());
+                        System.out.println("Abastecedor " + abastecedorModel.getNome() + " --> " + aeroporto.getLocalName()+": Quero Trabalhar");
                         cfp.addReceiver(aeroporto);
                     }
                     cfp.setConversationId("proposta-abastecedor");
@@ -140,7 +140,7 @@ public class AbastecedorAgent extends Agent {
                     msg.setConversationId("proposta-abastecedor");
                     msg.setReplyWith("trabalhar" + System.currentTimeMillis());
                     myAgent.send(msg);
-                    System.out.println("Abastecedor " + abastecedorModel.getNome() + " --> " + Escolhido.getName() + ": Aceito Trabalhar");
+                    System.out.println("Abastecedor " + abastecedorModel.getNome() + " --> " + Escolhido.getLocalName()+ ": Aceito Trabalhar");
 
                     mt = MessageTemplate.and(MessageTemplate.MatchConversationId("proposta-abastecedor"),
                             MessageTemplate.MatchInReplyTo(msg.getReplyWith()));
@@ -155,7 +155,7 @@ public class AbastecedorAgent extends Agent {
                             System.out.println("Abastecedor " + abastecedorModel.getNome() + ": trabalhando para o  " + aeroportoAgent.getLocalName());
 
                         } else {
-                            System.out.println("Abastecedor " + abastecedorModel.getNome() + ": não foi contratado por " + Escolhido.getName() + " já conseguiu outro abastecedor");
+                            System.out.println("Abastecedor " + abastecedorModel.getNome() + ": não foi contratado por " + Escolhido.getLocalName()+ " já conseguiu outro abastecedor");
                         }
 
                         estado = 4;

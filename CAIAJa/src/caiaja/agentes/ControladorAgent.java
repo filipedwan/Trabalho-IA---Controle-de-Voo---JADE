@@ -5,6 +5,7 @@
  */
 package caiaja.agentes;
 
+import caiaja.CAIAJa;
 import caiaja.model.Aeroporto;
 import caiaja.model.Aviao;
 import caiaja.model.Controlador;
@@ -48,6 +49,7 @@ public class ControladorAgent extends Agent {
     List<AID> fila_propor_reabastecimento;
 
     boolean pistaOcupada;
+    boolean buscandoAeroporto;
 
     AID aeroporto;
     List<Aviao> Avioes;
@@ -64,6 +66,7 @@ public class ControladorAgent extends Agent {
 
         controlador_modelo = new Controlador();
         aeroporto = null;
+        buscandoAeroporto = false;
         if (args != null) {
             if (args.length > 0) {
                 controlador_modelo.setNome((String) args[0]);
@@ -75,19 +78,7 @@ public class ControladorAgent extends Agent {
 
                 getContentManager().registerOntology(CAIAJaOntologia.getInstance());
 
-                DFAgentDescription dfd = new DFAgentDescription();
-                dfd.setName(getAID());
-                ServiceDescription sd = new ServiceDescription();
-                sd.setType("Controlador");
-                sd.setName(controlador_modelo.getNome());
-
-                dfd.addServices(sd);
-
-                try {
-                    DFService.register(this, dfd);
-                } catch (FIPAException fe) {
-                    fe.printStackTrace();
-                }
+                CAIAJa.registrarServico(this, "Controlador", controlador_modelo.getNome());
 
                 addBehaviour(new BuscarEmprego(this, 2000));
 
@@ -109,6 +100,7 @@ public class ControladorAgent extends Agent {
         }
     }
 
+    @Override
     protected void takeDown() {
         System.out.println("Controlador " + controlador_modelo.getNome() + " saindo de operação.");
     }
@@ -136,23 +128,13 @@ public class ControladorAgent extends Agent {
         @Override
         protected void onTick() {
 
-            if (aeroporto == null) {
-                DFAgentDescription template = new DFAgentDescription();
-                ServiceDescription sd = new ServiceDescription();
-                sd.setType("Aeroporto");
-                template.addServices(sd);
+            if (aeroporto == null && !buscandoAeroporto) {
+                buscandoAeroporto = true;
+                List<AID> aeroportos = CAIAJa.getServico(myAgent, "Aeroporto");
 
-                List<AID> aerosportos = new ArrayList<AID>();
-                try {
-                    DFAgentDescription[] result = DFService.search(myAgent, template);
-                    for (int i = 0; i < result.length; ++i) {
-                        aerosportos.add(result[i].getName());
-                    }
-                } catch (FIPAException fe) {
-                    fe.printStackTrace();
-                }
-
-                myAgent.addBehaviour(new PropoeControlar(aerosportos));
+                myAgent.addBehaviour(new PropoeControlar(aeroportos));
+            } else {
+                block();
             }
         }
 
@@ -166,8 +148,14 @@ public class ControladorAgent extends Agent {
         private MessageTemplate mt; // The template to receive replies
         private int repliesCnt = 0;
 
-        public PropoeControlar(List<AID> aerosportos) {
-            this.aeroportos = aerosportos;
+        public PropoeControlar(List<AID> aeroportos) {
+            this.aeroportos = aeroportos;
+        }
+
+        @Override
+        public int onEnd() {
+            buscandoAeroporto = false;
+            return super.onEnd();
         }
 
         @Override
@@ -178,7 +166,7 @@ public class ControladorAgent extends Agent {
                     ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
 
                     for (AID aerosporto : aeroportos) {
-                        System.out.println(controlador_modelo.getNome() + " --> " + aerosporto.getName());
+                        System.out.println(controlador_modelo.getNome() + " --> " + aerosporto.getLocalName()+ ": Posso controlar?");
                         cfp.addReceiver(aerosporto);
                     }
                     cfp.setConversationId("proposta-controlador");
@@ -238,7 +226,7 @@ public class ControladorAgent extends Agent {
                             } catch (UnreadableException ex) {
                                 Logger.getLogger(ControladorAgent.class.getName()).log(Level.SEVERE, null, ex);
                             }
-                            System.out.println(controlador_modelo.getNome() + ": Operando no aeroporto" + aeroporto_modelo.getPrefixo());
+                            System.out.println(controlador_modelo.getNome() + ": Operando no aeroporto " + aeroporto_modelo.getPrefixo());
 
                         } else {
                             System.out.println(controlador_modelo.getNome() + ": não pode controlar " + Escolhido.getLocalName() + " já conseguiu outro controlador");
@@ -721,6 +709,7 @@ public class ControladorAgent extends Agent {
         @Override
         public void action() {
             if (!fila_pilotos_pousar.isEmpty() && !pistaOcupada) {
+                pistaOcupada= true;
                 Pousar pouso = fila_pilotos_pousar.remove(0);
                 System.out.println("Controlador " + controlador_modelo.getNome() + ": Chamar para pouso " + pouso.getAviao().getPrefixo());
 
@@ -731,6 +720,7 @@ public class ControladorAgent extends Agent {
 
                 myAgent.send(confirmaLiberacao);
             } else if (!fila_pilotos_decolar.isEmpty() && !pistaOcupada) {
+                pistaOcupada= true;
                 Decolar decolagem = fila_pilotos_decolar.remove(0);
                 System.out.println("Controlador " + controlador_modelo.getNome() + ": Chamar para decolagem " + decolagem.getAviao().getPrefixo());
 

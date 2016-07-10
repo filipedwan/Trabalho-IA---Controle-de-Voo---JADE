@@ -59,37 +59,47 @@ public class CAIAJa {
         Pilotos.add("Fernando");
         Pilotos.add("Filipe");
         Pilotos.add("Marcelo");
+        
+        Pilotos.add("Dion");
+        Pilotos.add("Walter");
+        Pilotos.add("Jonathas");
 
         Controladores.add("Jose");
+        Controladores.add("Thais");
 
         Bombeiros.add("Carlos");
+        Bombeiros.add("Ornelio");
 
         abastecedores.add("Ville");
+        abastecedores.add("George");
 
         /**
          * Inicializando Agentes
          */
         try {
 
-            AgentController Aeroporto = ac.createNewAgent("AeroportoSBBV", "caiaja.agentes.AeroportoAgent", new String[]{"", "SBBV", "Atlas Brasil Catanhete", "2700"});
-            Aeroporto.start();
+            AgentController AeroportoBVB = ac.createNewAgent("BVB", "caiaja.agentes.AeroportoAgent", new String[]{"", "BVB", "Atlas Brasil Catanhete", "2700"});
+            AeroportoBVB.start();
+            
+            AgentController AeroportoMAO = ac.createNewAgent("MAO", "caiaja.agentes.AeroportoAgent", new String[]{"", "MAO", "Eduardo Gomes", "8858"});
+            AeroportoMAO.start();
 
             for (String piloto : Pilotos) {
-                AgentController Piloto = ac.createNewAgent("p_" + piloto, "caiaja.agentes.PilotoAgent", new String[]{piloto});
+                AgentController Piloto = ac.createNewAgent(piloto, "caiaja.agentes.PilotoAgent", new String[]{piloto});
                 Agentes.add(Piloto);
             }
             for (String Controlador : Controladores) {
-                AgentController Controlador1 = ac.createNewAgent("c_" + Controlador, "caiaja.agentes.ControladorAgent", new String[]{Controlador});
+                AgentController Controlador1 = ac.createNewAgent(Controlador, "caiaja.agentes.ControladorAgent", new String[]{Controlador});
                 Agentes.add(Controlador1);
             }
 
             for (String bombeiro : Bombeiros) {
-                AgentController Bombeiros1 = ac.createNewAgent("b_" + bombeiro, "caiaja.agentes.BombeiroAgent", new String[]{bombeiro});
+                AgentController Bombeiros1 = ac.createNewAgent(bombeiro, "caiaja.agentes.BombeiroAgent", new String[]{bombeiro});
                 Agentes.add(Bombeiros1);
             }
 
             for (String abastacedor : abastecedores) {
-                AgentController Bombeiros1 = ac.createNewAgent("a_" + abastacedor, "caiaja.agentes.AbastecedorAgent", new String[]{abastacedor});
+                AgentController Bombeiros1 = ac.createNewAgent(abastacedor, "caiaja.agentes.AbastecedorAgent", new String[]{abastacedor});
                 Agentes.add(Bombeiros1);
             }
 

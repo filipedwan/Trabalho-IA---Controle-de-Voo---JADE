@@ -299,7 +299,7 @@ public class PilotoAgent extends Agent {
                     ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
 
                     for (AID aeroporto : lista_aeroportos) {
-                        System.out.println(piloto.getNome() + " --> " + aeroporto.getLocalName());
+                        System.out.println(piloto.getNome() + " --> " + aeroporto.getLocalName()+": quero uma aeronave pra pilotar");
                         cfp.addReceiver(aeroporto);
                     }
                     cfp.setConversationId("proposta-piloto");
