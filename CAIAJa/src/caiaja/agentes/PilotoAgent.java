@@ -140,7 +140,7 @@ public class PilotoAgent extends Agent {
                     }
                     
                 } else if (aeroportoModel != null) {
-                    
+                    //TODO ADicionar busca de aeroporto destino "plano de voo"
                     if (aviao.getNilveCombustivel() > 0.4f) {
                         myAgent.addBehaviour(new PilotoAgent.PropoeDecolar(myAgent));
                     } else {
@@ -560,6 +560,7 @@ public class PilotoAgent extends Agent {
                     break;
                 }
                 case 5: {
+                    emAcao = false;
                     break;
                 }
             }
