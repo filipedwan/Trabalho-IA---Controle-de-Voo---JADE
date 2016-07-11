@@ -12,6 +12,7 @@ import caiaja.model.Controlador;
 import caiaja.model.Incendio;
 import caiaja.ontologia.CAIAJaOntologia;
 import caiaja.ontologia.acoes.Decolar;
+import caiaja.ontologia.acoes.PlanoDeVoo;
 import caiaja.ontologia.acoes.Pousar;
 import jade.content.lang.sl.SLCodec;
 import jade.core.AID;
@@ -45,7 +46,7 @@ public class ControladorAgent extends Agent {
     Aeroporto aeroporto_modelo;
 
     List<Pousar> fila_pilotos_pousar;
-    List<Decolar> fila_pilotos_decolar;
+    List<PlanoDeVoo> fila_pilotos_decolar;
     List<AID> fila_propor_reabastecimento;
 
     boolean pistaOcupada;
@@ -58,7 +59,7 @@ public class ControladorAgent extends Agent {
     public ControladorAgent() {
         Avioes = new ArrayList<Aviao>();
         fila_pilotos_pousar = new ArrayList<Pousar>();
-        fila_pilotos_decolar = new ArrayList<Decolar>();
+        fila_pilotos_decolar = new ArrayList<PlanoDeVoo>();
         fila_propor_reabastecimento = new ArrayList<AID>();
     }
 
@@ -596,31 +597,34 @@ public class ControladorAgent extends Agent {
             if (msg != null) {
                 ACLMessage reply = msg.createReply();
 
-                Decolar conteudo = null;
+                PlanoDeVoo planoDeVoo = null;
                 try {
-                    conteudo = (Decolar) msg.getContentObject();
+                    planoDeVoo = (PlanoDeVoo) msg.getContentObject();
 
                 } catch (UnreadableException ex) {
                     Logger.getLogger(ControladorAgent.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                if (conteudo != null) {
+                if (planoDeVoo.getAeroportoOrigem() == aeroporto_modelo) {
+                    System.out.println("======================== Iguais ===============================");
+                }
+                if (planoDeVoo != null) {
 
                     if (ancidente) {
-                        System.out.println("Controlador " + controlador_modelo.getNome() + ":  " + conteudo.getPiloto().getNome() + " Aeroporto fechado, Acidente na pista");
+                        System.out.println("Controlador " + controlador_modelo.getNome() + ":  " + planoDeVoo.getPiloto().getNome() + " Aeroporto fechado, Acidente na pista");
 
                         reply.setContent("negado acidente");
 
                         reply.setPerformative(ACLMessage.REJECT_PROPOSAL);
                     } else if (!fila_pilotos_pousar.isEmpty()) {
 
-                        System.out.println("Controlador " + controlador_modelo.getNome() + ":  " + conteudo.getPiloto().getNome() + " pedido rejeitado outra aeronave esta pousando");
+                        System.out.println("Controlador " + controlador_modelo.getNome() + ":  " + planoDeVoo.getPiloto().getNome() + " pedido rejeitado outra aeronave esta pousando");
 
                         reply.setContent("negado aguarde");
 
                         reply.setPerformative(ACLMessage.REJECT_PROPOSAL);
                     } else if (!fila_pilotos_decolar.isEmpty()) {
 
-                        System.out.println("Controlador " + controlador_modelo.getNome() + ":  " + conteudo.getPiloto().getNome() + " aguarde outra aeronave estão decolando");
+                        System.out.println("Controlador " + controlador_modelo.getNome() + ":  " + planoDeVoo.getPiloto().getNome() + " aguarde outra aeronave estão decolando");
 
                         reply.setContent("aguarde");
 
@@ -659,9 +663,9 @@ public class ControladorAgent extends Agent {
             if (msg != null) {
                 ACLMessage reply = msg.createReply();
 
-                Decolar conteudo = null;
+                PlanoDeVoo planoDeVoo = null;
                 try {
-                    conteudo = (Decolar) msg.getContentObject();
+                    planoDeVoo = (PlanoDeVoo) msg.getContentObject();
 
                 } catch (UnreadableException ex) {
                     Logger.getLogger(ControladorAgent.class.getName()).log(Level.SEVERE, null, ex);
@@ -670,12 +674,13 @@ public class ControladorAgent extends Agent {
                 if (!pistaOcupada && !ancidente) {
                     pistaOcupada = true;
                     reply.setPerformative(ACLMessage.CONFIRM);
-                    System.out.println(controlador_modelo.getNome() + ": Pode decolar " + conteudo.getAviao().getPrefixo());
+                    System.out.println(controlador_modelo.getNome() + ": Pode decolar " + planoDeVoo.getAviao());
                 } else {
-                    conteudo.setReplyWith(reply.getInReplyTo());
+                    System.err.println("planoDeVoo id: " + planoDeVoo.getIdplano());
+//                    planoDeVoo.setIdplano(reply.getInReplyTo());
                     reply.setPerformative(ACLMessage.REQUEST);
                     System.out.println(controlador_modelo.getNome() + ": Aguarde");
-                    fila_pilotos_decolar.add(conteudo);
+                    fila_pilotos_decolar.add(planoDeVoo);
                 }
 
                 myAgent.send(reply);
@@ -779,13 +784,13 @@ public class ControladorAgent extends Agent {
 
             } else if (!fila_pilotos_decolar.isEmpty() && !pistaOcupada) {
                 pistaOcupada = true;
-                Decolar decolagem = fila_pilotos_decolar.remove(0);
-                System.out.println("Controlador " + controlador_modelo.getNome() + ": Chamar para decolagem " + decolagem.getAviao().getPrefixo());
+                PlanoDeVoo decolagem = fila_pilotos_decolar.remove(0);
+                System.out.println("Controlador " + controlador_modelo.getNome() + ": Chama " + decolagem.getAviao() + "para decolagem ");
 
                 ACLMessage confirmaLiberacao = new ACLMessage(ACLMessage.CONFIRM);
                 confirmaLiberacao.addReceiver(decolagem.getActor());
                 confirmaLiberacao.setConversationId("liberacao-piloto-decolar");
-                confirmaLiberacao.setInReplyTo(decolagem.getReplyWith());
+                confirmaLiberacao.setInReplyTo(decolagem.getIdplano());
                 confirmaLiberacao.setSender(getAID());
 
                 myAgent.send(confirmaLiberacao);

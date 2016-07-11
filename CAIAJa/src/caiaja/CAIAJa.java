@@ -7,6 +7,7 @@ package caiaja;
 // macelo testando gitHub clone commit
 // -----------------------------------
 
+import caiaja.model.Aeroporto;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.Profile;
@@ -31,6 +32,8 @@ import java.util.logging.Logger;
  */
 public class CAIAJa {
 
+    public static List<Aeroporto> aeroportos;
+
     /**
      * @param args the command line arguments
      */
@@ -48,6 +51,7 @@ public class CAIAJa {
         } else {
             jade.core.Runtime.instance().createAgentContainer(p);
         }
+        aeroportos = new ArrayList<>();
 
         List<AgentController> Agentes = new ArrayList<>();
 
@@ -60,10 +64,10 @@ public class CAIAJa {
         Pilotos.add("Filipe");
         Pilotos.add("Marcelo");
 
-        Pilotos.add("Dion");
-        Pilotos.add("Walter");
-        Pilotos.add("Jonathas");
-        
+//        Pilotos.add("Dion");
+//        Pilotos.add("Walter");
+//        Pilotos.add("Jonathas");
+
 //        Pilotos.add("Gustavo");
 //        Pilotos.add("Mhayk");
 //        Pilotos.add("Manoel");
@@ -82,10 +86,10 @@ public class CAIAJa {
          */
         try {
 
-            AgentController AeroportoBVB = ac.createNewAgent("BVB", "caiaja.agentes.AeroportoAgent", new String[]{"", "BVB", "Atlas Brasil Catanhete", "2700"});
+            AgentController AeroportoBVB = ac.createNewAgent("BVB", "caiaja.agentes.AeroportoAgent", new String[]{"", "BVB", "Atlas Brasil Cantanhede", "2700"});
             AeroportoBVB.start();
 
-            AgentController AeroportoMAO = ac.createNewAgent("MAO", "caiaja.agentes.AeroportoAgent", new String[]{"", "MAO", "Eduardo Gomes", "8858"});
+            AgentController AeroportoMAO = ac.createNewAgent("MAO", "caiaja.agentes.AeroportoAgent", new String[]{"", "MAO", "Eduardo Gomes", "2700"});
             AeroportoMAO.start();
 
             for (String piloto : Pilotos) {
@@ -112,7 +116,7 @@ public class CAIAJa {
         }
 
         try {
-            Thread.sleep(10000);
+            Thread.sleep(1000);
         } catch (InterruptedException ex) {
             Logger.getLogger(CAIAJa.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -184,6 +188,22 @@ public class CAIAJa {
         } catch (FIPAException fe) {
             fe.printStackTrace();
         }
+    }
+
+    public static void addAeroporto(Aeroporto aero) {
+        aeroportos.add(aero);
+    }
+
+    public static void removeAeroporto(Aeroporto aero) {
+        aeroportos.remove(aero);
+    }
+
+    public static List<Aeroporto> getAeroportos() {
+        return aeroportos;
+    }
+
+    public static void setAeroportos(List<Aeroporto> aeroportos) {
+        CAIAJa.aeroportos = aeroportos;
     }
 
 }

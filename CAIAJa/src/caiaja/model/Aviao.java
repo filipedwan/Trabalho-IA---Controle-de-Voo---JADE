@@ -130,6 +130,11 @@ public class Aviao implements Serializable, Concept {
     }
 
     @Override
+    public String toString() {
+        return "Aviao{" + Prefixo + '}';
+    }
+
+    @Override
     public int hashCode() {
         int hash = 7;
         hash = 83 * hash + Objects.hashCode(this.Prefixo);
