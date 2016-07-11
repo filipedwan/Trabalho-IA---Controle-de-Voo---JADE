@@ -6,8 +6,6 @@
 package caiaja.janelas;
 
 import caiaja.model.Aeroporto;
-import caiaja.model.Aviao;
-import caiaja.model.Piloto;
 import caiaja.ontologia.acoes.PlanoDeVoo;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,24 +17,31 @@ import javax.swing.event.ListDataListener;
  */
 public class PlanoDeVooJPanel extends javax.swing.JPanel {
 
-    AeroportosComboboxModel Aerporotos;
+    AeroportosComboboxModel aeroportos;
 
     PlanoDeVoo planodevoo;
 
     /**
      * Creates new form PlanoDeVooJPanel
+     *
+     * @param planodevoo palno de voo a ser alterado
+     * @param lista_aeroportos lista de aeroportos existenes no ambiente
      */
-    public PlanoDeVooJPanel(PlanoDeVoo planodevoo, List<Aeroporto> aeroportos) {
+    public PlanoDeVooJPanel(PlanoDeVoo planodevoo, List<Aeroporto> lista_aeroportos) {
         this.planodevoo = planodevoo;
 
-        Aerporotos = new AeroportosComboboxModel(aeroportos);
+        this.aeroportos = new AeroportosComboboxModel(lista_aeroportos);
+        if (lista_aeroportos.size() > 0) {
+            planodevoo.setAeroportoDestino(lista_aeroportos.get(0));
+            this.aeroportos.setSelectedItem(0);
+        }
         initComponents();
 
     }
 
     @Override
     public void setVisible(boolean aFlag) {
-        planodevoo.setAeroportoDestino((Aeroporto) Aerporotos.getSelectedItem());
+        planodevoo.setAeroportoDestino((Aeroporto) aeroportos.getSelectedItem());
         super.setVisible(aFlag); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -64,10 +69,20 @@ public class PlanoDeVooJPanel extends javax.swing.JPanel {
 
         jLabel2.setText("Aeroporto Destino");
 
-        jComboBox2.setModel(Aerporotos);
+        jComboBox2.setModel(aeroportos);
         jComboBox2.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusLost(java.awt.event.FocusEvent evt) {
                 jComboBox2FocusLost(evt);
+            }
+        });
+        jComboBox2.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jComboBox2MouseClicked(evt);
+            }
+        });
+        jComboBox2.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                jComboBox2KeyReleased(evt);
             }
         });
 
@@ -122,9 +137,19 @@ public class PlanoDeVooJPanel extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jComboBox2FocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jComboBox2FocusLost
-        planodevoo.setAeroportoDestino((Aeroporto) Aerporotos.getSelectedItem());
-        System.err.println("Focus lost");
+        planodevoo.setAeroportoDestino((Aeroporto) aeroportos.getSelectedItem());
+//        System.err.println("Focus lost");
     }//GEN-LAST:event_jComboBox2FocusLost
+
+    private void jComboBox2KeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jComboBox2KeyReleased
+        planodevoo.setAeroportoDestino((Aeroporto) aeroportos.getSelectedItem());
+//        System.err.println("key released");
+    }//GEN-LAST:event_jComboBox2KeyReleased
+
+    private void jComboBox2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jComboBox2MouseClicked
+        planodevoo.setAeroportoDestino((Aeroporto) aeroportos.getSelectedItem());
+//        System.err.println("mouse clicked");
+    }//GEN-LAST:event_jComboBox2MouseClicked
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -146,12 +171,12 @@ public class PlanoDeVooJPanel extends javax.swing.JPanel {
         this.planodevoo = planodevoo;
     }
 
-    public AeroportosComboboxModel getAerporotos() {
-        return Aerporotos;
+    public AeroportosComboboxModel getAeroportos() {
+        return aeroportos;
     }
 
-    public void setAerporotos(AeroportosComboboxModel Aerporotos) {
-        this.Aerporotos = Aerporotos;
+    public void setAeroportos(AeroportosComboboxModel aeroportos) {
+        this.aeroportos = aeroportos;
     }
 
     private class AeroportosComboboxModel implements javax.swing.ComboBoxModel {

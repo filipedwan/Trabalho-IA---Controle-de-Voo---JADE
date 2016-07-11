@@ -66,31 +66,35 @@ public class CAIAJa {
 
 //        Pilotos.add("Dion");
 //        Pilotos.add("Walter");
-//        Pilotos.add("Jonathas");
 
 //        Pilotos.add("Gustavo");
 //        Pilotos.add("Mhayk");
-//        Pilotos.add("Manoel");
         
         Controladores.add("Jose");
         Controladores.add("Thais");
+        Controladores.add("Rosiane");
 
         Bombeiros.add("Carlos");
         Bombeiros.add("Ornelio");
+        Bombeiros.add("Manoel");
 
         abastecedores.add("Ville");
         abastecedores.add("George");
+        abastecedores.add("Jonathas");
 
         /**
          * Inicializando Agentes
          */
         try {
 
-            AgentController AeroportoBVB = ac.createNewAgent("BVB", "caiaja.agentes.AeroportoAgent", new String[]{"", "BVB", "Atlas Brasil Cantanhede", "2700"});
-            AeroportoBVB.start();
+            AgentController AeroportoSBBV = ac.createNewAgent("SBBV", "caiaja.agentes.AeroportoAgent", new String[]{"", "SBBV", "Atlas Brasil Cantanhede", "2700"});
+            AeroportoSBBV.start();
 
-            AgentController AeroportoMAO = ac.createNewAgent("MAO", "caiaja.agentes.AeroportoAgent", new String[]{"", "MAO", "Eduardo Gomes", "2700"});
-            AeroportoMAO.start();
+            AgentController AeroportoSBEG = ac.createNewAgent("SBEG", "caiaja.agentes.AeroportoAgent", new String[]{"", "SBEG", "Eduardo Gomes", "2700"});
+            AeroportoSBEG.start();
+            
+            AgentController AeroportoSBMN = ac.createNewAgent("SBMN", "caiaja.agentes.AeroportoAgent", new String[]{"", "SBMN", "PONTA PELADA", "2318"});
+            AeroportoSBMN.start();
 
             for (String piloto : Pilotos) {
                 AgentController Piloto = ac.createNewAgent(piloto, "caiaja.agentes.PilotoAgent", new String[]{piloto});
