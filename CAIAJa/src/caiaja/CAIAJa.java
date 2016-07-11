@@ -62,7 +62,7 @@ public class CAIAJa {
 
         Pilotos.add("Fernando");
         Pilotos.add("Filipe");
-        Pilotos.add("Marcelo");
+        Pilotos.add("Macelo");
 
 //        Pilotos.add("Dion");
 //        Pilotos.add("Walter");
