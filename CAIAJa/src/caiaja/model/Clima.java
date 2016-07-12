@@ -11,6 +11,7 @@ import java.io.Serializable;
 /**
  *
  * @author fosa
+ * Modelo de Clima, para o Agente EstacaoMeteorologica manipalar
  */
 public class Clima implements Serializable, Concept {
 

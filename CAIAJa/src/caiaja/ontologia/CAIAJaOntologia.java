@@ -25,6 +25,8 @@ import jade.content.schema.PrimitiveSchema;
 /**
  *
  * @author fosa
+ * Ontologia utilizada no sistema. Conjunto de termos técnicos e conhecimentos
+ * no contexto da aviação
  */
 public class CAIAJaOntologia extends BeanOntology {
 

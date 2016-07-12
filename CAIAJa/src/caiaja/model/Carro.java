@@ -11,6 +11,7 @@ import java.io.Serializable;
 /**
  *
  * @author fosa
+ * Modelo de Carro, para o agente Bombeiro manipalar
  */
 public class Carro implements Serializable, Concept {
 

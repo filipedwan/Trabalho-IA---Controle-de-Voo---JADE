@@ -14,6 +14,7 @@ import java.util.Objects;
 /**
  *
  * @author fosa
+ * Modelo de Aeroporto, para o agente responsável por este manipalar
  */
 public class Aeroporto implements Serializable, Concept {
 

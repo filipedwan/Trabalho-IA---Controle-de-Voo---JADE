@@ -19,6 +19,7 @@ import java.util.logging.Logger;
 /**
  *
  * @author fosa
+ * Janela para cadastro de novos pilotos
  */
 public class CaiaJaJanela extends javax.swing.JFrame {
 

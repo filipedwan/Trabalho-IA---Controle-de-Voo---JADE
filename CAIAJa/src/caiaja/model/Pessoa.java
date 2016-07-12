@@ -13,6 +13,7 @@ import java.util.Objects;
 /**
  *
  * @author fosa
+ * Modelo de Pessoa, o qual todos os modelos trabalhadores irao herdar
  */
 public class Pessoa implements Serializable, Concept {
 

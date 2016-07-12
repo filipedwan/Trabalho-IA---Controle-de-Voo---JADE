@@ -7,7 +7,6 @@ package caiaja.agentes;
 
 import caiaja.CAIAJa;
 import caiaja.janelas.PlanoDeVooJPanel;
-import caiaja.janelas.PlanoDeVooJanela;
 import caiaja.model.Abastecedor;
 import caiaja.model.Aeroporto;
 import caiaja.model.Aviao;
@@ -16,9 +15,7 @@ import caiaja.model.Controlador;
 import caiaja.model.Incendio;
 import caiaja.model.Piloto;
 import caiaja.ontologia.CAIAJaOntologia;
-import caiaja.ontologia.acoes.Decolar;
 import caiaja.ontologia.acoes.PlanoDeVoo;
-import caiaja.ontologia.acoes.Pousar;
 import jade.content.lang.sl.SLCodec;
 import jade.core.AID;
 import jade.core.Agent;
@@ -30,7 +27,6 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.lang.acl.UnreadableException;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -38,7 +34,10 @@ import javax.swing.JOptionPane;
 
 /**
  *
- * @author ufrr
+ * @author Dwan
+ * O PilotoAgent é capaz de se cadastrar no DFService procurar 
+ * emprego em um Aeroporto, pilotar e pousar avião, 
+ * além de solicitar abastecimento baseado no seu nível de combustível
  */
 public class PilotoAgent extends Agent {
 
@@ -115,7 +114,7 @@ public class PilotoAgent extends Agent {
         protected void onTick() {
 
             /**
-             * Verifica atitudde a ser tomada
+             * Verifica atitude a ser tomada
              */
             if (!emAcao) {
                 if (aviao == null) {
@@ -196,12 +195,11 @@ public class PilotoAgent extends Agent {
         @Override
         public int onEnd() {
             emAcao = false;
-            return super.onEnd(); //To change body of generated methods, choose Tools | Templates.
+            return super.onEnd();
         }
 
         @Override
         public void action() {
-//            System.err.println(piloto.getNome() + ": Abasceter " + estado);
             switch (estado) {
                 case 0: {
                     ACLMessage buscaabastecedor = new ACLMessage(ACLMessage.REQUEST);
@@ -358,7 +356,7 @@ public class PilotoAgent extends Agent {
         List<AID> lista_aeroportos;
         AID Escolhido;
         int estado = 0;
-        private MessageTemplate mt; // The template to receive replies
+        private MessageTemplate mt;
         private int repliesCnt = 0;
 
         public PropoePilotar(List<AID> aerosportos) {
@@ -367,7 +365,6 @@ public class PilotoAgent extends Agent {
 
         @Override
         public void action() {
-            //System.out.println(piloto.getNome() + ": Pilotar " + estado);
             switch (estado) {
                 case 0: {
                     ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
@@ -478,7 +475,6 @@ public class PilotoAgent extends Agent {
         int estado = 0;
         private MessageTemplate mt;
         int estado_final = 10;
-//        Pousar pousar;
 
         public PropoePousar(Agent myAgent) {
             super(myAgent);
@@ -487,7 +483,6 @@ public class PilotoAgent extends Agent {
 
         @Override
         public void action() {
-//            System.err.println(piloto.getNome() + ": Pousar " + estado);
             switch (estado) {
                 case 0: {
                     ACLMessage proposta = new ACLMessage(ACLMessage.PROPOSE);

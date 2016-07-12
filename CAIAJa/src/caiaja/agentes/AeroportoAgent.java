@@ -27,6 +27,12 @@ import java.util.logging.Logger;
 /**
  *
  * @author fosa
+ * O AeroportoAgent é capaz de se cadastrar no DFService 
+ * além de processor todas as requisições de emprego solicitadas
+ * por contraladores, pilotos, bombeiros, abastecedores.
+ * Outrosim, este ele faz a ponte com outros agentes
+ * para agindo como um agente uniciente do modelo aeroportoModel o qual
+ * ele controla
  */
 public class AeroportoAgent extends Agent {
 

@@ -11,6 +11,7 @@ import java.io.Serializable;
 /**
  *
  * @author fosa
+ * Modelo de Pista, para o agente responsável por este manipalar
  */
 public class Pista implements Serializable, Concept {
 

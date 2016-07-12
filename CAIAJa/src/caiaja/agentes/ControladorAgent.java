@@ -35,11 +35,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import sun.misc.Queue;
 
 /**
  *
  * @author fosa
+ * O ControladorAgent é capaz de se cadastrar no DFService e procurar 
+ * emprego em um aeroporto. Além disso, ele é responsável por analisar
+ * as propostas dos pilotos de decolagem e pouso.
+ * Outrosim, ele deve verificar os alertas de acidentes e se posicianar
+ * quando estes forem extintos.
  */
 public class ControladorAgent extends Agent {
 

@@ -7,6 +7,7 @@ import jade.content.Predicate;
 /**
  *
  * @author fosa
+ * ControladorE
  */
 public class ControladorE implements Predicate {
 

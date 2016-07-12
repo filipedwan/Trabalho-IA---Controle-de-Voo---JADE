@@ -10,7 +10,8 @@ import java.io.Serializable;
 
 /**
  *
- * @author ufrr
+ * @author Dwan
+ * Modelo de Bombeiro, para o agente responsável por este manipalar
  */
 public class Bombeiro extends Pessoa implements Serializable, Concept {
     

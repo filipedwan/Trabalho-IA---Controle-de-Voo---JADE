@@ -14,6 +14,8 @@ import jade.lang.acl.MessageTemplate;
 /**
  *
  * @author fosa
+ * Agent responsável por enviar mensagens sobre as condições 
+ * de voo, baseado no clima atual.
  */
 public class EstacaoMeteorologicaAgent extends Agent {
 

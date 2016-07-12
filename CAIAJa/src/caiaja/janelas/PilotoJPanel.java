@@ -10,6 +10,7 @@ import caiaja.agentes.PilotoAgent;
 /**
  *
  * @author fosa
+ * Painel do Piloto com informações de voo
  */
 public class PilotoJPanel extends javax.swing.JPanel {
 

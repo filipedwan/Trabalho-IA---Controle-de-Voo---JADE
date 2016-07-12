@@ -14,6 +14,7 @@ import javax.swing.event.ListDataListener;
 /**
  *
  * @author fosa
+ * Painel com o itinerário de voo do Piloto
  */
 public class PlanoDeVooJPanel extends javax.swing.JPanel {
 

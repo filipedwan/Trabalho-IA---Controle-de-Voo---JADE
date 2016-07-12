@@ -29,6 +29,12 @@ import java.util.logging.Logger;
 /**
  *
  * @author fosa
+ * Classe Principal.
+ * Nesta classe, são criados todas as instâncias de agentes do
+ * sistema. Além disso, ela possui dois métodos estáticos para a
+ * registrar e pegar serviço do DFService (págias amarelas).
+ * Por fim, a classe possui métodos de acesso para os agestes
+ * aeroportos dos sistema
  */
 public class CAIAJa {
 

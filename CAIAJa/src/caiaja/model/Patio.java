@@ -11,6 +11,7 @@ import java.io.Serializable;
 /**
  *
  * @author fosa
+ * Modelo de Patio, para o agente responsável por este manipalar
  */
 public class Patio implements Serializable, Concept {
 

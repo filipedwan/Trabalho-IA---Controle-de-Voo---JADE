@@ -10,6 +10,7 @@ import caiaja.agentes.ControladorAgent;
 /**
  *
  * @author fosa
+ * Janela do controlador
  */
 public class ControladorJanela extends javax.swing.JFrame {
 

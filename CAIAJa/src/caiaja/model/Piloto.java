@@ -13,6 +13,7 @@ import java.util.Objects;
 /**
  *
  * @author fosa
+ * Modelo de Pista, para o agente responsável por este manipalar
  */
 public class Piloto extends Pessoa implements Serializable, Concept {
 

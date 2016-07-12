@@ -7,6 +7,7 @@ import jade.content.Predicate;
 /**
  *
  * @author fosa
+ * Um controlador controla um aeroporto. Ação do sistema.
  */
 public class Controla implements Predicate {
 

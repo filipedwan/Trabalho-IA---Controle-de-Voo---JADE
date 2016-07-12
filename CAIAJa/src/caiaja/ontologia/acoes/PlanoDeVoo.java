@@ -15,6 +15,7 @@ import java.io.Serializable;
 /**
  *
  * @author fosa
+ * Plano de voo com o itinerário do piloto
  */
 public class PlanoDeVoo implements Concept, Serializable {
 

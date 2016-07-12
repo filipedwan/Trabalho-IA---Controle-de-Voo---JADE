@@ -26,7 +26,10 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author ufrr
+ * @author Dwan
+ * O BombeiroAgent é capaz de se cadastrar no DFService procurar 
+ * emprego em um aeroporto. Além disso, ele fica aguardando alertas 
+ * de incêndios no aeroporto o qual ele trabalho, a fim de apagá-lo.
  */
 public class BombeiroAgent extends Agent {
 
@@ -79,22 +82,6 @@ public class BombeiroAgent extends Agent {
                     System.out.println("Bombeiro " + bombeiro_modelo.getNome() + ": trabalhando em " + aeroporto_modelo.getNome());
                     pronunciamento = true;
                 }
-
-//                System.out.println("Bombeiro " + bombeiro_modelo.getNome() + ": Ativando incendio em " + aeroporto_modelo.getNome());
-//                Incendio incendio_modelo = new Incendio(5);
-//
-//                lista_incendio_modelo.add(incendio_modelo);
-//                if (!ativo) {
-//
-//                    if (combateIncendio == null) {
-//                        combateIncendio = new Thread(new CombateIncendio((BombeiroAgent) myAgent));
-//                    } else if (!combateIncendio.isAlive()) {
-//                        combateIncendio.stop();
-//                        combateIncendio = new Thread(new CombateIncendio((BombeiroAgent) myAgent));
-//                    }
-//                    combateIncendio.start();
-//
-//                }
                 block(1000);
             }
         }
@@ -115,7 +102,6 @@ public class BombeiroAgent extends Agent {
 
         @Override
         public void action() {
-//            System.out.println("Bombeiro " + bombeiro_modelo.getNome() + ": Trabalho bombeiro " + estado);
             switch (estado) {
                 case 0: {
                     ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
@@ -128,7 +114,6 @@ public class BombeiroAgent extends Agent {
                     cfp.setReplyWith("cfp" + System.currentTimeMillis());
                     cfp.setContent("Precisa de Bombeiro?");
                     myAgent.send(cfp);
-                    // Prepare the template to get proposals
                     mt = MessageTemplate.and(MessageTemplate.MatchConversationId("proposta-bombeiro"),
                             MessageTemplate.MatchInReplyTo(cfp.getReplyWith()));
                     estado = 1;
@@ -138,7 +123,6 @@ public class BombeiroAgent extends Agent {
                     ACLMessage reply = myAgent.receive(mt);
 
                     if (reply != null) {
-                        // Reply received
                         if (reply.getPerformative() == ACLMessage.PROPOSE) {
                             Escolhido = reply.getSender();
                             try {
@@ -160,7 +144,6 @@ public class BombeiroAgent extends Agent {
                 case 2: {
                     ACLMessage msg = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
                     msg.addReceiver(Escolhido);
-//                    controlar.setContent("Aceito controlar");
                     try {
                         msg.setContentObject(bombeiro_modelo);
                     } catch (IOException ex) {

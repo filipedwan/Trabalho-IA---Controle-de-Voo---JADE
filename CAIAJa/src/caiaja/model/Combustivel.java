@@ -11,6 +11,7 @@ import java.io.Serializable;
 /**
  *
  * @author fosa
+ * Modelo de Combustivel, para o agente responsável por este manipalar
  */
 public class Combustivel implements Concept, Serializable {
 

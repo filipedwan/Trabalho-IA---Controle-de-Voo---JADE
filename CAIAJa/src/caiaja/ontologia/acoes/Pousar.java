@@ -14,6 +14,7 @@ import jade.core.AID;
 /**
  *
  * @author fosa
+ * Ação para o pouso do Piloto
  */
 public class Pousar implements Concept {
 

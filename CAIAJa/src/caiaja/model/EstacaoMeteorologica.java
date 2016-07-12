@@ -11,6 +11,7 @@ import java.io.Serializable;
 /**
  *
  * @author fosa
+ * Modelo de EstacaoMeteorologica, para o agente responsável por este manipalar
  */
 public class EstacaoMeteorologica implements Serializable, Concept {
     

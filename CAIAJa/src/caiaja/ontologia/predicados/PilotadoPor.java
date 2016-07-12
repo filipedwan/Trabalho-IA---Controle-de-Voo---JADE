@@ -7,6 +7,7 @@ import jade.content.Predicate;
 /**
  *
  * @author fosa
+ * Um avião é pilotado por um Piloto
  */
 public class PilotadoPor implements Predicate {
 

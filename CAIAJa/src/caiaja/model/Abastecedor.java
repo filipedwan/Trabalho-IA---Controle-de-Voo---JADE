@@ -9,6 +9,7 @@ import java.io.Serializable;
 /**
  *
  * @author Laian
+ * Modelo de Abastecedor, para o agente responsável por este manipalar
  */
 public class Abastecedor extends Pessoa implements Serializable, Concept {
     private int Capacidade;

@@ -12,6 +12,7 @@ import java.util.Objects;
 /**
  *
  * @author fosa
+ * Modelo de Controlador, para o agente responsável por este manipalar
  */
 public class Controlador extends Pessoa implements Serializable, Concept {
 

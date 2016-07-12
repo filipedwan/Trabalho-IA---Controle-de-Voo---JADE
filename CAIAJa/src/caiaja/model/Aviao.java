@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 /**
  *
  * @author fosa
+ * Modelo de Aviao, para o agente responsável por este manipalar
  */
 public class Aviao implements Serializable, Concept {
 

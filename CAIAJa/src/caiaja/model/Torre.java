@@ -10,6 +10,7 @@ import jade.content.Concept;
 /**
  *
  * @author fosa
+ * Modelo de Torre, para o agente responsável por este manipalar
  */
 public class Torre implements Concept {
 

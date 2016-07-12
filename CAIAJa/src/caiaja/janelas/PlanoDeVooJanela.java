@@ -13,6 +13,7 @@ import javax.swing.event.ListDataListener;
 /**
  *
  * @author fosa
+ * Janela com o plano de voo do Piloto
  */
 public class PlanoDeVooJanela extends javax.swing.JFrame {
 

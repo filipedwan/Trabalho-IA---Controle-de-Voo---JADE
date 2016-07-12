@@ -6,6 +6,7 @@ import java.io.Serializable;
 /**
  *
  * @author Fosa
+ * Modelo de Incendio, para o agente responsável por este manipalar
  */
 public class Incendio implements Serializable, Concept {
 

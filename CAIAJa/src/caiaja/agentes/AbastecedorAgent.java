@@ -5,7 +5,6 @@ import caiaja.model.Abastecedor;
 import caiaja.model.Aeroporto;
 import caiaja.model.Aviao;
 import caiaja.model.Combustivel;
-import caiaja.model.Incendio;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
@@ -22,6 +21,9 @@ import java.util.logging.Logger;
 /**
  *
  * @author Laian
+ * O AbastecedirAgent é capaz de se cadastrar no DFService procurar 
+ * emprego em um Aeroporto e atender aos pedidos de abastecimentos
+ * solicitados quando estes estiverem inativos.
  */
 public class AbastecedorAgent extends Agent {
 

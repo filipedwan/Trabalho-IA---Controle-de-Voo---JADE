@@ -15,6 +15,7 @@ import java.io.Serializable;
 /**
  *
  * @author fosa
+ * Ações possíveis dentro do contexto de um aeroporto
  */
 public class Decolar implements Concept, Serializable {
 
