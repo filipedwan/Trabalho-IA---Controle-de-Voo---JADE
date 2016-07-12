@@ -3,6 +3,9 @@ package caiaja.agentes;
 import caiaja.CAIAJa;
 import caiaja.model.Abastecedor;
 import caiaja.model.Aeroporto;
+import caiaja.model.Aviao;
+import caiaja.model.Combustivel;
+import caiaja.model.Incendio;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
@@ -25,23 +28,19 @@ public class AbastecedorAgent extends Agent {
     private Abastecedor abastecedorModel;
     private boolean ativo;
     private AID aeroportoAgent;
-    private AID controladorAgent;
-    private AID pilotoAtualAgent;
     private Aeroporto aeroportoModel;
+    private boolean pronunciamento;
 
     @Override
     protected void setup() {
         Object[] args = getArguments();
         abastecedorModel = new Abastecedor();
         ativo = false;
+        pronunciamento = false;
         aeroportoAgent = null;
-        controladorAgent = null;
-        pilotoAtualAgent = null;
         aeroportoModel = null;
         if (args != null) {
             if (args.length > 0) {
-                //executar classe privada aguardaPedidoDeAbastecimento
-
                 abastecedorModel.setNome((String) args[0]);
 
                 System.out.println("Abastecedor " + abastecedorModel.getNome() + " procurar trabalho..");
@@ -49,9 +48,7 @@ public class AbastecedorAgent extends Agent {
                 CAIAJa.registrarServico(this, "Abastecedor", abastecedorModel.getNome());
 
                 addBehaviour(new AbastecedorAgent.BuscaAtividade(this, 5000));
-
-                //AguardaPedidoDeAbastecimento aguarda;
-                //aguarda = new AguardaPedidoDeAbastecimento();
+                addBehaviour(new RecebePedidosDeAbastecimento(this));
             }
         }
     }
@@ -65,11 +62,15 @@ public class AbastecedorAgent extends Agent {
         @Override
         protected void onTick() {
             if (aeroportoModel == null) {
-            //if (aeroportoAgent == null) {
+                //if (aeroportoAgent == null) {
                 List<AID> aeroportos = CAIAJa.getServico(myAgent, "Aeroporto");
                 addBehaviour(new AbastecedorAgent.PropoeTrabalhar(aeroportos));
             } else {
-                System.out.println("Abastecedor " + abastecedorModel.getNome() + ": trabalhando em " + aeroportoModel.getNome());
+
+                if (!pronunciamento) {
+                    System.out.println("Abastecedor " + abastecedorModel.getNome() + ": trabalhando em " + aeroportoModel.getNome());
+                    pronunciamento = true;
+                }
                 //TODO: Atuação do agente Abastecedor
             }
         }
@@ -95,7 +96,7 @@ public class AbastecedorAgent extends Agent {
                     ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
 
                     for (AID aeroporto : aeroportos) {
-                        System.out.println("Abastecedor " + abastecedorModel.getNome() + " --> " + aeroporto.getLocalName()+": Quero Trabalhar");
+                        System.out.println("Abastecedor " + abastecedorModel.getNome() + " --> " + aeroporto.getLocalName() + ": Quero Trabalhar");
                         cfp.addReceiver(aeroporto);
                     }
                     cfp.setConversationId("proposta-abastecedor");
@@ -140,7 +141,7 @@ public class AbastecedorAgent extends Agent {
                     msg.setConversationId("proposta-abastecedor");
                     msg.setReplyWith("trabalhar" + System.currentTimeMillis());
                     myAgent.send(msg);
-                    System.out.println("Abastecedor " + abastecedorModel.getNome() + " --> " + Escolhido.getLocalName()+ ": Aceito Trabalhar");
+                    System.out.println("Abastecedor " + abastecedorModel.getNome() + " --> " + Escolhido.getLocalName() + ": Aceito Trabalhar");
 
                     mt = MessageTemplate.and(MessageTemplate.MatchConversationId("proposta-abastecedor"),
                             MessageTemplate.MatchInReplyTo(msg.getReplyWith()));
@@ -155,7 +156,7 @@ public class AbastecedorAgent extends Agent {
                             System.out.println("Abastecedor " + abastecedorModel.getNome() + ": trabalhando para o  " + aeroportoAgent.getLocalName());
 
                         } else {
-                            System.out.println("Abastecedor " + abastecedorModel.getNome() + ": não foi contratado por " + Escolhido.getLocalName()+ " já conseguiu outro abastecedor");
+                            System.out.println("Abastecedor " + abastecedorModel.getNome() + ": não foi contratado por " + Escolhido.getLocalName() + " já conseguiu outro abastecedor");
                         }
 
                         estado = 4;
@@ -183,23 +184,76 @@ public class AbastecedorAgent extends Agent {
 
     }
 
-    /*    
-    private class AguardaPedidoDeAbastecimento extends CyclicBehaviour{
-        
+    /**
+     * Classe para responder aos requerimentos de controladores que precisem de
+     * um aeroporto pra controlar, retonar sim ou não para a requisição
+     */
+    private class RecebePedidosDeAbastecimento extends CyclicBehaviour {
+
+        public RecebePedidosDeAbastecimento(Agent a) {
+            super(a);
+        }
+
         @Override
         public void action() {
-            
-            ACLMessage msg = myAgent.receive();
-            if(msg != null){
-                String content = msg.getContent();
-                if(content.equalsIgnoreCase("Abasteca")){
-                    //Receber msg o controlador
-                    //sobre qual aviao necessita abastecer
+//            MessageTemplate mt1 = MessageTemplate.MatchPerformative(ACLMessage.CFP);
+            MessageTemplate mt = MessageTemplate.MatchConversationId("proposta-piloto-abastecedor");
+//            MessageTemplate mt = MessageTemplate.and(mt1, mt2);
+            ACLMessage msg = myAgent.receive(mt);
+            if (msg != null) {
+                ACLMessage reply = msg.createReply();
+                if (msg.getPerformative() == ACLMessage.CFP) {
+                    Object obj = null;
+                    try {
+                        obj = msg.getContentObject();
+
+                        if (obj.getClass() == Aviao.class) {
+
+                            Aviao aviao = (Aviao) obj;
+
+                            reply.setPerformative(ACLMessage.PROPOSE);
+                            reply.setContentObject(abastecedorModel);
+
+                            System.out.println(abastecedorModel.getNome() + ": Posso lhe abastecer " + aviao.getPrefixo());
+
+                        }
+
+                    } catch (UnreadableException ex) {
+                        reply.setPerformative(ACLMessage.REFUSE);
+
+                    } catch (IOException ex) {
+                        Logger.getLogger(AbastecedorAgent.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+
+                } else if (msg.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
+                    Object obj = null;
+                    try {
+                        obj = msg.getContentObject();
+
+                        if (obj.getClass() == Aviao.class) {
+
+                            Aviao aviao = (Aviao) obj;
+
+                            Combustivel com = new Combustivel(aviao.getTamanhoTanque() - aviao.getCombustivel());
+
+                            reply.setPerformative(ACLMessage.INFORM);
+                            reply.setContentObject(com);
+
+                            System.out.println(abastecedorModel.getNome() + ": Enviando combustível " + aviao.getPrefixo());
+
+                        }
+
+                    } catch (UnreadableException ex) {
+                        reply.setPerformative(ACLMessage.REFUSE);
+
+                    } catch (IOException ex) {
+                        Logger.getLogger(AbastecedorAgent.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
+                myAgent.send(reply);
             } else {
                 block();
             }
         }
     }
-     */
 }

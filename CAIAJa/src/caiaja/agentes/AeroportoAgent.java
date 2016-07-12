@@ -72,10 +72,10 @@ public class AeroportoAgent extends Agent {
             }
             if (args.length > 3) {
                 try {
-                    int intargs = Integer.parseInt((String) args[2]);
+                    int intargs = Integer.parseInt((String) args[3]);
                     aeroporto_modelo.addPista(new Pista(intargs));
                 } catch (Exception e) {
-
+                    aeroporto_modelo.addPista(new Pista(2700));
                 }
             }
             System.out.println("Aeroporto " + aeroporto_modelo.getNome() + " operando");
@@ -107,7 +107,6 @@ public class AeroportoAgent extends Agent {
 
             CAIAJa.addAeroporto(aeroporto_modelo);
 
-//            addBehaviour(new RequisicoesDePropostas());
             addBehaviour(new RequisicoesDePropostasControladores());
             addBehaviour(new RequisicoesDePropostasPilotos());
             addBehaviour(new RequisicoesDePropostasBombeiros());
@@ -118,6 +117,7 @@ public class AeroportoAgent extends Agent {
 
             addBehaviour(new RequisicoesDePropostasAbastecedor());
             addBehaviour(new PropostaAbastecedor());
+            addBehaviour(new RequisicaoAbastecedor());
 
             addBehaviour(new RecebeAtualizacao());
             addBehaviour(new RecebeIncendioExtinto());
@@ -224,7 +224,7 @@ public class AeroportoAgent extends Agent {
 
                         reply.setPerformative(ACLMessage.INFORM);
                         reply.setContentObject(aeroporto_modelo);
-                        System.out.println("Aeroporto " + aeroporto_modelo.getNome() + ": controlado por " + msg.getSender().getName());
+                        System.out.println("Aeroporto " + aeroporto_modelo.getNome() + ": controlado por " + msg.getSender().getLocalName());
                     } catch (UnreadableException ex) {
                         System.out.println("Aeroporto " + aeroporto_modelo.getNome() + ": erro na msg");
                         reply.setPerformative(ACLMessage.FAILURE);
@@ -376,7 +376,6 @@ public class AeroportoAgent extends Agent {
 
             ACLMessage msg = myAgent.receive(mt);
             if (msg != null) {
-                String title = msg.getContent();
                 ACLMessage reply = msg.createReply();
 
                 if (aeroporto_modelo.getAbastecedor() == null) {
@@ -409,34 +408,28 @@ public class AeroportoAgent extends Agent {
             );
             ACLMessage msg = myAgent.receive(mt);
             if (msg != null) {
-                String title = msg.getContent();
                 ACLMessage reply = msg.createReply();
 
-//                Aviao av = aeroporto_modelo.retiraAviao(0);
-//                if (av != null) {
-                try {
+                if (abastecedor_agente == null) {
+                    try {
+                        Abastecedor abastecedor = (Abastecedor) msg.getContentObject();
 
-                    Abastecedor abastecedor = (Abastecedor) msg.getContentObject();
+                        aeroporto_modelo.setAbastecedor(abastecedor);
 
-                    //aeroporto.setBombeiro(bombeiro);
-                    aeroporto_modelo.setAbastecedor(abastecedor);
+                        abastecedor_agente = msg.getSender();
 
-                    reply.setPerformative(ACLMessage.INFORM);
-                    reply.setContentObject(aeroporto_modelo);
-                    System.out.println("Aeroporto " + aeroporto_modelo.getNome() + ": aviao para " + abastecedor.getNome());
+                        reply.setPerformative(ACLMessage.INFORM);
+                        reply.setContentObject(aeroporto_modelo);
+                        System.out.println("Aeroporto " + aeroporto_modelo.getNome() + ": Posto de abastecimento " + abastecedor.getNome() + " = " + abastecedor_agente.getLocalName());
 
-                } catch (UnreadableException ex) {
-                    System.out.println("Aeroporto " + aeroporto_modelo.getNome() + ": erro na msg");
-                    reply.setPerformative(ACLMessage.FAILURE);
-                    reply.setContent("error-msg");
-                } catch (IOException ex) {
-                    Logger.getLogger(AeroportoAgent.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (UnreadableException ex) {
+                        System.out.println("Aeroporto " + aeroporto_modelo.getNome() + ": erro na msg");
+                        reply.setPerformative(ACLMessage.FAILURE);
+                        reply.setContent("error-msg");
+                    } catch (IOException ex) {
+                        Logger.getLogger(AeroportoAgent.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
-//                } else {
-//                    System.out.println("Aeroporto " + aeroporto_modelo.getNome() + ": pegaram o aviao neste tempo");
-//                    reply.setPerformative(ACLMessage.FAILURE);
-//                    reply.setContent("not-available");
-//                }
                 myAgent.send(reply);
             } else {
                 block();
@@ -453,7 +446,6 @@ public class AeroportoAgent extends Agent {
             );
             ACLMessage msg = myAgent.receive(mt);
             if (msg != null) {
-                String title = msg.getContent();
                 ACLMessage reply = msg.createReply();
 
                 try {
@@ -486,6 +478,40 @@ public class AeroportoAgent extends Agent {
         }
     }
 
+    private class RequisicaoAbastecedor extends CyclicBehaviour {
+
+        @Override
+        public void action() {
+            MessageTemplate mt = MessageTemplate.and(
+                    MessageTemplate.MatchPerformative(ACLMessage.REQUEST),
+                    MessageTemplate.MatchConversationId("piloto-solicita-abastecedor")
+            );
+            ACLMessage msg = myAgent.receive(mt);
+            if (msg != null) {
+                ACLMessage reply = msg.createReply();
+
+                try {
+                    if (abastecedor_agente != null) {
+                        reply.setPerformative(ACLMessage.INFORM);
+                        reply.setContentObject(abastecedor_agente);
+
+                        System.out.println(aeroporto_modelo.getPrefixo() + ": Este é nosso abstecedor " + abastecedor_agente.getLocalName());
+                    } else {
+                        reply.setPerformative(ACLMessage.FAILURE);
+                        reply.setContent("Não tenho abastecedor");
+
+                        System.out.println(aeroporto_modelo.getPrefixo() + ": Não temos abstecedor ");
+                    }
+                } catch (IOException ex) {
+                    Logger.getLogger(AeroportoAgent.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                myAgent.send(reply);
+            } else {
+                block();
+            }
+        }
+    }
+
     private class RecebeIncendioExtinto extends CyclicBehaviour {
 
         public void action() {
@@ -495,7 +521,6 @@ public class AeroportoAgent extends Agent {
             );
             ACLMessage msg = myAgent.receive(mt);
             if (msg != null) {
-                String title = msg.getContent();
                 ACLMessage reply = new ACLMessage(ACLMessage.INFORM);
 
                 reply.setConversationId("incendio-extinto");

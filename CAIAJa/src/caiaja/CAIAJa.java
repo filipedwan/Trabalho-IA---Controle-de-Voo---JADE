@@ -66,10 +66,8 @@ public class CAIAJa {
 
 //        Pilotos.add("Dion");
 //        Pilotos.add("Walter");
-
 //        Pilotos.add("Gustavo");
 //        Pilotos.add("Mhayk");
-        
         Controladores.add("Jose");
         Controladores.add("Thais");
         Controladores.add("Rosiane");
@@ -92,7 +90,7 @@ public class CAIAJa {
 
             AgentController AeroportoSBEG = ac.createNewAgent("SBEG", "caiaja.agentes.AeroportoAgent", new String[]{"", "SBEG", "Eduardo Gomes", "2700"});
             AeroportoSBEG.start();
-            
+
             AgentController AeroportoSBMN = ac.createNewAgent("SBMN", "caiaja.agentes.AeroportoAgent", new String[]{"", "SBMN", "PONTA PELADA", "2318"});
             AeroportoSBMN.start();
 

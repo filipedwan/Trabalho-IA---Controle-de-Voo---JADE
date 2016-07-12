@@ -10,6 +10,7 @@ import caiaja.model.Aeroporto;
 import caiaja.model.Aviao;
 import caiaja.model.Controlador;
 import caiaja.model.Incendio;
+import caiaja.model.Pista;
 import caiaja.ontologia.CAIAJaOntologia;
 import caiaja.ontologia.acoes.Decolar;
 import caiaja.ontologia.acoes.PlanoDeVoo;
@@ -45,7 +46,7 @@ public class ControladorAgent extends Agent {
     Controlador controlador_modelo;
     Aeroporto aeroporto_modelo;
 
-    List<Pousar> fila_pilotos_pousar;
+    List<PlanoDeVoo> fila_pilotos_pousar;
     List<PlanoDeVoo> fila_pilotos_decolar;
     List<AID> fila_propor_reabastecimento;
 
@@ -58,7 +59,7 @@ public class ControladorAgent extends Agent {
 
     public ControladorAgent() {
         Avioes = new ArrayList<Aviao>();
-        fila_pilotos_pousar = new ArrayList<Pousar>();
+        fila_pilotos_pousar = new ArrayList<PlanoDeVoo>();
         fila_pilotos_decolar = new ArrayList<PlanoDeVoo>();
         fila_propor_reabastecimento = new ArrayList<AID>();
     }
@@ -407,32 +408,48 @@ public class ControladorAgent extends Agent {
 
             ACLMessage msg = myAgent.receive(mt);
 
+            boolean pistaMinima = false;
+
             if (msg != null) {
                 ACLMessage reply = msg.createReply();
 
-                Pousar conteudo = null;
+                PlanoDeVoo planoDeVoo = null;
                 try {
-                    conteudo = (Pousar) msg.getContentObject();
+                    planoDeVoo = (PlanoDeVoo) msg.getContentObject();
+
+                    if (aeroporto_modelo.getPistas() != null) {
+                        for (Pista pista : aeroporto_modelo.getPistas()) {
+                            System.out.println("pista: " + pista.getTamanho());
+                            if (pista.getTamanho() > planoDeVoo.getAviao().getPistaMinima()) {
+                                pistaMinima = true;
+                            }
+                        }
+                    }
+
                 } catch (UnreadableException ex) {
                     Logger.getLogger(ControladorAgent.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                if (conteudo != null) {
+                if (!pistaMinima) {
+                    System.out.println("Controlador " + controlador_modelo.getNome() + ":  " + planoDeVoo.getAviao() + " pedido rejeitado pista muito curta para pouso");
+
+                    reply.setPerformative(ACLMessage.REJECT_PROPOSAL);
+                } else if (planoDeVoo != null) {
                     if (ancidente) {
-                        System.out.println("Controlador " + controlador_modelo.getNome() + ":  " + conteudo.getPiloto().getNome() + " Aeroporto fechado, Acidente na pista");
+                        System.out.println("Controlador " + controlador_modelo.getNome() + ":  " + planoDeVoo.getPiloto().getNome() + " Aeroporto fechado, Acidente na pista");
 
                         reply.setContent("negado acidente");
 
                         reply.setPerformative(ACLMessage.REJECT_PROPOSAL);
                     } else if (!fila_pilotos_pousar.isEmpty()) {
 
-                        System.out.println("Controlador " + controlador_modelo.getNome() + ":  " + conteudo.getPiloto().getNome() + " pedido rejeitado outra aeronave esta pousando");
+                        System.out.println("Controlador " + controlador_modelo.getNome() + ":  " + planoDeVoo.getPiloto().getNome() + " pedido rejeitado outra aeronave esta pousando");
 
                         reply.setContent("negado aguarde");
 
                         reply.setPerformative(ACLMessage.REJECT_PROPOSAL);
                     } else if (!fila_pilotos_decolar.isEmpty()) {
 
-                        System.out.println("Controlador " + controlador_modelo.getNome() + ":  " + conteudo.getPiloto().getNome() + " aguarde outra aeronave aeronave decolando");
+                        System.out.println("Controlador " + controlador_modelo.getNome() + ":  " + planoDeVoo.getPiloto().getNome() + " aguarde outra aeronave aeronave decolando");
 
                         reply.setContent("aguarde");
 
@@ -470,25 +487,25 @@ public class ControladorAgent extends Agent {
             if (msg != null) {
                 ACLMessage reply = msg.createReply();
 
-                Pousar conteudo = null;
+                PlanoDeVoo planoDeVoo = null;
                 try {
-                    conteudo = (Pousar) msg.getContentObject();
+                    planoDeVoo = (PlanoDeVoo) msg.getContentObject();
+
+                    if (!pistaOcupada) {
+                        pistaOcupada = true;
+                        reply.setPerformative(ACLMessage.CONFIRM);
+                        System.out.println(controlador_modelo.getNome() + ": Pode pousar " + planoDeVoo.getAviao().getPrefixo());
+                    } else {
+//                                    planoDeVoo.setReplyWith(planoDeVoo.getIdplano());
+
+                        reply.setPerformative(ACLMessage.REQUEST);
+                        System.out.println(controlador_modelo.getNome() + ": Aguarde");
+
+                        fila_pilotos_pousar.add(planoDeVoo);
+                    }
 
                 } catch (UnreadableException ex) {
                     Logger.getLogger(ControladorAgent.class.getName()).log(Level.SEVERE, null, ex);
-                }
-
-                if (!pistaOcupada) {
-                    pistaOcupada = true;
-                    reply.setPerformative(ACLMessage.CONFIRM);
-                    System.out.println(controlador_modelo.getNome() + ": Pode pousar " + conteudo.getAviao().getPrefixo());
-                } else {
-                    conteudo.setReplyWith(reply.getInReplyTo());
-
-                    reply.setPerformative(ACLMessage.REQUEST);
-                    System.out.println(controlador_modelo.getNome() + ": Aguarde");
-
-                    fila_pilotos_pousar.add(conteudo);
                 }
 
                 myAgent.send(reply);
@@ -734,24 +751,38 @@ public class ControladorAgent extends Agent {
 //                    + "fila_pilotos_pousar.isEmpty(" + fila_pilotos_pousar.isEmpty() + ")\n"
 //                    + "fila_pilotos_decolar.isEmpty(" + fila_pilotos_decolar.isEmpty() + ")");
             if (ancidente) {
-                Pousar pouso = fila_pilotos_pousar.remove(0);
+                if (fila_pilotos_pousar.size() > 0) {
+                    PlanoDeVoo pouso = fila_pilotos_pousar.remove(0);
 
-                System.out.println("Controlador " + controlador_modelo.getNome() + ": Aeroporto fechado por acidente!");
+                    System.out.println("Controlador " + controlador_modelo.getNome() + ": Aeroporto fechado por acidente!");
 
-                ACLMessage confirmaLiberacao = new ACLMessage(ACLMessage.DISCONFIRM);
-                confirmaLiberacao.addReceiver(pouso.getActor());
-                confirmaLiberacao.setConversationId("liberacao-piloto-pouso");
-                confirmaLiberacao.setInReplyTo(pouso.getReplyWith());
+                    ACLMessage confirmaLiberacao = new ACLMessage(ACLMessage.DISCONFIRM);
+                    confirmaLiberacao.addReceiver(pouso.getActor());
+                    confirmaLiberacao.setConversationId("liberacao-piloto-pousar");
+                    confirmaLiberacao.setInReplyTo(pouso.getIdplano());
 
-                myAgent.send(confirmaLiberacao);
+                    myAgent.send(confirmaLiberacao);
+                } else if (fila_pilotos_decolar.size() > 0) {
+                    PlanoDeVoo pouso = fila_pilotos_pousar.remove(0);
+
+                    System.out.println("Controlador " + controlador_modelo.getNome() + ": Aeroporto fechado por acidente!");
+
+                    ACLMessage confirmaLiberacao = new ACLMessage(ACLMessage.DISCONFIRM);
+                    confirmaLiberacao.addReceiver(pouso.getActor());
+                    confirmaLiberacao.setConversationId("liberacao-piloto-decolar");
+                    confirmaLiberacao.setInReplyTo(pouso.getIdplano());
+
+                    myAgent.send(confirmaLiberacao);
+                }
             } else if (!fila_pilotos_pousar.isEmpty() && !pistaOcupada) {
-                Pousar pouso = fila_pilotos_pousar.remove(0);
+                pistaOcupada = true;
+                PlanoDeVoo pouso = fila_pilotos_pousar.remove(0);
                 System.out.println("Controlador " + controlador_modelo.getNome() + ": Chamar para pouso " + pouso.getAviao().getPrefixo());
 
                 ACLMessage confirmaLiberacao = new ACLMessage(ACLMessage.CONFIRM);
                 confirmaLiberacao.addReceiver(pouso.getActor());
-                confirmaLiberacao.setConversationId("liberacao-piloto-pouso");
-                confirmaLiberacao.setInReplyTo(pouso.getReplyWith());
+                confirmaLiberacao.setConversationId("liberacao-piloto-pousar");
+                confirmaLiberacao.setInReplyTo(pouso.getIdplano());
                 confirmaLiberacao.setReplyWith("pouso" + System.currentTimeMillis());
 
                 myAgent.send(confirmaLiberacao);
@@ -775,8 +806,8 @@ public class ControladorAgent extends Agent {
                 } else {
                     ACLMessage cancelarLiberacao = new ACLMessage(ACLMessage.CANCEL);
                     cancelarLiberacao.addReceiver(pouso.getActor());
-                    cancelarLiberacao.setConversationId("liberacao-piloto-pouso");
-                    cancelarLiberacao.setInReplyTo(pouso.getReplyWith());
+                    cancelarLiberacao.setConversationId("liberacao-piloto-pousar");
+                    cancelarLiberacao.setInReplyTo(pouso.getIdplano());
                     cancelarLiberacao.setReplyWith("pouso" + System.currentTimeMillis());
 
                     myAgent.send(cancelarLiberacao);
@@ -785,14 +816,14 @@ public class ControladorAgent extends Agent {
             } else if (!fila_pilotos_decolar.isEmpty() && !pistaOcupada) {
                 pistaOcupada = true;
                 PlanoDeVoo decolagem = fila_pilotos_decolar.remove(0);
-                System.out.println("Controlador " + controlador_modelo.getNome() + ": Chama " + decolagem.getAviao() + "para decolagem ");
+                System.out.println("Controlador " + controlador_modelo.getNome() + ": Chama " + decolagem.getAviao() + " para decolagem ");
 
                 ACLMessage confirmaLiberacao = new ACLMessage(ACLMessage.CONFIRM);
                 confirmaLiberacao.addReceiver(decolagem.getActor());
                 confirmaLiberacao.setConversationId("liberacao-piloto-decolar");
                 confirmaLiberacao.setInReplyTo(decolagem.getIdplano());
                 confirmaLiberacao.setSender(getAID());
-
+                
                 myAgent.send(confirmaLiberacao);
             } else {
                 block(2000);

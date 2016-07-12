@@ -111,6 +111,7 @@ public class Aviao implements Serializable, Concept {
                 if (th.isAlive()) {
                     th.stop();
                 }
+                th = null;
             }
         }
 
@@ -131,7 +132,7 @@ public class Aviao implements Serializable, Concept {
 
     @Override
     public String toString() {
-        return "Aviao{" + Prefixo + '}';
+        return Prefixo;
     }
 
     @Override
@@ -168,7 +169,7 @@ public class Aviao implements Serializable, Concept {
 
                 if (getAceleracaoMotor() > 0) {
                     setCombustivel(combustivel - getMotores());
-                    milis -= (500 * getAceleracaoMotor());
+                    milis -= (600 * getAceleracaoMotor());
                 }
                 if (getCombustivel() <= (getTamanhoTanque() * 0.1) && getCombustivel() >= (getTamanhoTanque() * 0.09)) {
                     System.err.println(getPrefixo() + ": 10% combutivel");

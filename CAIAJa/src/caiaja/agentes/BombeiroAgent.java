@@ -36,6 +36,7 @@ public class BombeiroAgent extends Agent {
     private AID aeroporto_agente;
     private boolean ativo;
     Thread combateIncendio;
+    private boolean pronunciamento;
 
     protected void setup() {
         Object[] args = getArguments();
@@ -44,6 +45,7 @@ public class BombeiroAgent extends Agent {
         aeroporto_agente = null;
         aeroporto_modelo = null;
         ativo = false;
+        pronunciamento = false;
         lista_incendio_modelo = new ArrayList<>();
 
         if (args != null) {
@@ -73,7 +75,10 @@ public class BombeiroAgent extends Agent {
             if (aeroporto_modelo == null) {
                 myAgent.addBehaviour(new BombeiroAgent.PropoeTrabalhar(CAIAJa.getServico(myAgent, "Aeroporto")));
             } else {
-                System.out.println("Bombeiro " + bombeiro_modelo.getNome() + ": trabalhando em " + aeroporto_modelo.getNome());
+                if (!pronunciamento) {
+                    System.out.println("Bombeiro " + bombeiro_modelo.getNome() + ": trabalhando em " + aeroporto_modelo.getNome());
+                    pronunciamento = true;
+                }
 
 //                System.out.println("Bombeiro " + bombeiro_modelo.getNome() + ": Ativando incendio em " + aeroporto_modelo.getNome());
 //                Incendio incendio_modelo = new Incendio(5);
@@ -116,7 +121,7 @@ public class BombeiroAgent extends Agent {
                     ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
 
                     for (AID aeroporto : aeroportos) {
-                        System.out.println("Bombeiro " + bombeiro_modelo.getNome() + " --> " + aeroporto.getLocalName()+": Quero trabalhar");
+                        System.out.println("Bombeiro " + bombeiro_modelo.getNome() + " --> " + aeroporto.getLocalName() + ": Quero trabalhar");
                         cfp.addReceiver(aeroporto);
                     }
                     cfp.setConversationId("proposta-bombeiro");
@@ -164,7 +169,7 @@ public class BombeiroAgent extends Agent {
                     msg.setConversationId("proposta-bombeiro");
                     msg.setReplyWith("trabalhar" + System.currentTimeMillis());
                     myAgent.send(msg);
-                    System.out.println("Bombeiro " + bombeiro_modelo.getNome() + " --> " + Escolhido.getLocalName()+ ": Aceito Trabalhar");
+                    System.out.println("Bombeiro " + bombeiro_modelo.getNome() + " --> " + Escolhido.getLocalName() + ": Aceito Trabalhar");
 
                     mt = MessageTemplate.and(MessageTemplate.MatchConversationId("proposta-bombeiro"),
                             MessageTemplate.MatchInReplyTo(msg.getReplyWith()));
@@ -179,7 +184,7 @@ public class BombeiroAgent extends Agent {
                             System.out.println("Bombeiro " + bombeiro_modelo.getNome() + ": trabalhando para o  " + aeroporto_agente.getLocalName());
 
                         } else {
-                            System.out.println("Bombeiro " + bombeiro_modelo.getNome() + ": não foi contratado por " + Escolhido.getLocalName()+ " já conseguiu outro bombeiro");
+                            System.out.println("Bombeiro " + bombeiro_modelo.getNome() + ": não foi contratado por " + Escolhido.getLocalName() + " já conseguiu outro bombeiro");
                         }
 
                         estado = 4;
@@ -288,7 +293,7 @@ public class BombeiroAgent extends Agent {
                 myAgent.lista_incendio_modelo.remove(0);
 
                 while (incendio_modelo.combateIncendio() > 0) {
-                    System.err.println("Combatendo o incendio (" + myAgent.lista_incendio_modelo.size() + ")");                    
+                    System.err.println("Combatendo o incendio (" + myAgent.lista_incendio_modelo.size() + ")");
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException ex) {

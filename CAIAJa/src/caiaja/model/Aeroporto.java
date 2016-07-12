@@ -128,7 +128,7 @@ public class Aeroporto implements Serializable, Concept {
 
     @Override
     public String toString() {
-        return "Aeroporto{" + Nome + '}';
+        return Prefixo + " " + Nome;
     }
 
     @Override
